@@ -28,11 +28,6 @@ stages:
           - task: NuGetCommand@2
             inputs:
               restoreSolution: '$(solution)'
-          - script: |
-              echo "Creating artifact staging directory: $(Build.ArtifactStagingDirectory)"
-              mkdir -p "$(Build.ArtifactStagingDirectory)"
-            displayName: 'Create Artifact Staging Directory'
-
           - task: VSBuild@1
             inputs:
               solution: '$(solution)'
