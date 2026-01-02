@@ -11,4 +11,8 @@
     <ProjectReference Include="..\OfferManager.Domain\OfferManager.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NServiceBus" Version="9.2.8" />
+  </ItemGroup>
+
 </Project>
