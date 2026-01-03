@@ -53,7 +53,7 @@ resource "azurerm_mssql_database" "main" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_role_assignment" "current_kv_secrets_officer" {
-  scope                = azurerm_key_vault.kv.id
+  scope                = azurerm_key_vault.app.id
   role_definition_name = "Key Vault Secrets Officer"
   principal_id         = data.azurerm_client_config.current.object_id
   depends_on   = [azurerm_key_vault.app]
