@@ -26,9 +26,6 @@ resource "azurerm_key_vault" "app" {
   resource_group_name         = azurerm_resource_group.main.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
-
-  soft_delete_enabled         = true
-  purge_protection_enabled    = false
 }
 
 # SQL admin credentials (for demo, use Key Vault or secure method in production)
