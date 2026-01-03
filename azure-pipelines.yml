@@ -49,11 +49,12 @@ stages:
         steps:
           - powershell: |
               if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/main") {
-                Write-Host "##vso[task.setvariable variable=env]prd"
+                Write-Host "##vso[task.setvariable variable=env;isOutput=true]prd"
               } else {
-                Write-Host "##vso[task.setvariable variable=env]dev"
+                Write-Host "##vso[task.setvariable variable=env;isOutput=true]dev"
               }
             displayName: 'Set environment variable (env) based on branch'
+            name: SetEnv
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
@@ -78,7 +79,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
-              args: '-var-file=$(System.DefaultWorkingDirectory)/terraform/$(env).tfvars'
+              args: '-var-file=$(System.DefaultWorkingDirectory)/terraform/$(SetEnv.env).tfvars'
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
@@ -87,4 +88,4 @@ stages:
               command: 'apply'
               environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve -var-file=$(System.DefaultWorkingDirectory)/terraform/$(env).tfvars'
+              args: '-auto-approve -var-file=$(System.DefaultWorkingDirectory)/terraform/$(SetEnv.env).tfvars'
