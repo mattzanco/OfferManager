@@ -63,5 +63,3 @@ resource "azurerm_key_vault_secret" "db_connection" {
 }
 
 data "azurerm_client_config" "current" {}
-
-data "azurerm_client_config" "current" {}
