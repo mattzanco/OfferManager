@@ -47,17 +47,11 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - script: |
-              if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
-                echo "##vso[task.setvariable variable=tfvars_file]prd.tfvars"
-              else
-                echo "##vso[task.setvariable variable=tfvars_file]dev.tfvars"
-              fi
-            displayName: 'Set tfvars file based on branch'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
               terraformVersion: 'latest'
+
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Init'
             inputs:
@@ -69,6 +63,7 @@ stages:
               backendAzureRmStorageAccountName: 'tfstatestorage'
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
+
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Plan'
             inputs:
@@ -76,6 +71,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
             inputs:
