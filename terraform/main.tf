@@ -50,6 +50,20 @@ resource "azurerm_mssql_database" "main" {
   max_size_gb         = 5
 }
 
+# Grant current Terraform principal access to Key Vault secrets
+resource "azurerm_key_vault_access_policy" "current" {
+  key_vault_id = azurerm_key_vault.app.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete"
+  ]
+}
+
 # Store the connection string in Key Vault
 resource "azurerm_key_vault_secret" "db_connection" {
   name         = "DbConnectionString"
