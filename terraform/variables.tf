@@ -1,3 +1,9 @@
+# Application name for resource naming
+variable "app_name" {
+  description = "Application name for resource naming"
+  type        = string
+  default     = "offermanager"
+}
 # Define your Terraform variables here
 
 variable "resource_group_name" {
