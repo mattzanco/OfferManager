@@ -1,3 +1,8 @@
+# Environment name (dev, prd, etc.)
+variable "env" {
+  description = "Environment name for resource naming (e.g., dev, prd)"
+  type        = string
+}
 # Application name for resource naming
 variable "app_name" {
   description = "Application name for resource naming"
