@@ -24,12 +24,12 @@ stages:
         pool:
           vmImage: 'windows-latest'
         steps:
-          - script: |
-              if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
-                echo "##vso[task.setvariable variable=env]prd"
-              else
-                echo "##vso[task.setvariable variable=env]dev"
-              fi
+          - powershell: |
+              if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/main") {
+                Write-Host "##vso[task.setvariable variable=env]prd"
+              } else {
+                Write-Host "##vso[task.setvariable variable=env]dev"
+              }
             displayName: 'Set environment variable (env) based on branch'
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
