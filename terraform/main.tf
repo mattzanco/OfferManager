@@ -15,7 +15,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name = substr(replace(lower("${var.resource_group_name}-${terraform.workspace}"), "_", "-"), 0, 24)
+  name = substr(replace(lower("${var.app_name}-${terraform.workspace}-rg"), "_", "-"), 0, 24)
   location = var.location
 }
 
