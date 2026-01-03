@@ -50,18 +50,13 @@ resource "azurerm_mssql_database" "main" {
   max_size_gb         = 5
 }
 
-# Grant current Terraform principal access to Key Vault secrets
-resource "azurerm_key_vault_access_policy" "current" {
-  key_vault_id = azurerm_key_vault.app.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id
+data "azurerm_client_config" "current" {}
 
-  secret_permissions = [
-    "Get",
-    "List",
-    "Set",
-    "Delete"
-  ]
+resource "azurerm_role_assignment" "current_kv_secrets_officer" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+  depends_on   = [azurerm_key_vault.app]
 }
 
 # Store the connection string in Key Vault
@@ -69,7 +64,9 @@ resource "azurerm_key_vault_secret" "db_connection" {
   name         = "DbConnectionString"
   value        = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=sqladminuser;Password=${random_password.sql_admin.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   key_vault_id = azurerm_key_vault.app.id
-  depends_on   = [azurerm_key_vault.app]
+  depends_on = [
+    azurerm_role_assignment.current_kv_secrets_officer
+  ]
 }
 
 data "azurerm_client_config" "current" {}
