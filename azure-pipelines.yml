@@ -9,10 +9,12 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
+
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  env: $[eq(variables['Build.SourceBranch'], 'refs/heads/main') ? 'prd' : 'dev']
 
 
 stages:
@@ -71,6 +73,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+              args: '-var-file=$(System.DefaultWorkingDirectory)/terraform/$(env).tfvars'
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
@@ -79,4 +82,4 @@ stages:
               command: 'apply'
               environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve'
+              args: '-auto-approve -var-file=$(System.DefaultWorkingDirectory)/terraform/$(env).tfvars'
