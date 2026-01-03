@@ -1,5 +1,6 @@
 # Environment name (dev, prd, etc.)
 variable "env" {
+  default     = "dev"
   description = "Environment name for resource naming (e.g., dev, prd)"
   type        = string
 }
