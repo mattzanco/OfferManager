@@ -24,6 +24,9 @@ stages:
         pool:
           vmImage: 'windows-latest'
         steps:
+          - script: bash ./terraform/set-workspace.sh
+            displayName: 'Set Terraform Workspace (dev/prd)'
+            workingDirectory: '$(System.DefaultWorkingDirectory)'
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
             inputs:

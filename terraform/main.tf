@@ -15,13 +15,13 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = var.resource_group_name
+  name     = "${var.resource_group_name}-${terraform.workspace}"
   location = var.location
 }
 
 # Azure Key Vault for the app
 resource "azurerm_key_vault" "app" {
-  name                        = "${var.resource_group_name}-kv"
+  name                        = "${var.resource_group_name}-${terraform.workspace}-kv"
   location                    = azurerm_resource_group.main.location
   resource_group_name         = azurerm_resource_group.main.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
@@ -38,7 +38,7 @@ resource "random_password" "sql_admin" {
 }
 
 resource "azurerm_mssql_server" "main" {
-  name                         = "${var.resource_group_name}-sqlsrv"
+  name                         = "${var.resource_group_name}-${terraform.workspace}-sqlsrv"
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
   version                      = "12.0"
@@ -47,7 +47,7 @@ resource "azurerm_mssql_server" "main" {
 }
 
 resource "azurerm_mssql_database" "main" {
-  name                = "${var.resource_group_name}-sqldb"
+  name                = "${var.resource_group_name}-${terraform.workspace}-sqldb"
   server_id           = azurerm_mssql_server.main.id
   sku_name            = "S0"
   collation           = "SQL_Latin1_General_CP1_CI_AS"
