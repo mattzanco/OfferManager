@@ -68,5 +68,3 @@ resource "azurerm_key_vault_secret" "db_connection" {
     azurerm_role_assignment.current_kv_secrets_officer
   ]
 }
-
-data "azurerm_client_config" "current" {}
