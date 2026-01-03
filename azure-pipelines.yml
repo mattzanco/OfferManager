@@ -47,9 +47,7 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - script: bash ./terraform/set-workspace.sh
-            displayName: 'Set Terraform Workspace (dev/prd)'
-            workingDirectory: '$(System.DefaultWorkingDirectory)'
+          # Removed set-workspace.sh step as per request
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
