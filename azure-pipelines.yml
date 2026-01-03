@@ -24,13 +24,6 @@ stages:
         pool:
           vmImage: 'windows-latest'
         steps:
-          - powershell: |
-              if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/main") {
-                Write-Host "##vso[task.setvariable variable=env]prd"
-              } else {
-                Write-Host "##vso[task.setvariable variable=env]dev"
-              }
-            displayName: 'Set environment variable (env) based on branch'
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
             inputs:
@@ -54,6 +47,13 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+          - powershell: |
+              if ($env:BUILD_SOURCEBRANCH -eq "refs/heads/main") {
+                Write-Host "##vso[task.setvariable variable=env]prd"
+              } else {
+                Write-Host "##vso[task.setvariable variable=env]dev"
+              }
+            displayName: 'Set environment variable (env) based on branch'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
