@@ -47,7 +47,6 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          # Removed set-workspace.sh step as per request
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
