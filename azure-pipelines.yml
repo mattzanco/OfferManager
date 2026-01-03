@@ -9,13 +9,10 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  env: $[eq(variables['Build.SourceBranch'], 'refs/heads/main') ? 'prd' : 'dev']
-
 
 stages:
   - stage: BuildAndTest
@@ -26,6 +23,14 @@ stages:
         pool:
           vmImage: 'windows-latest'
         steps:
+                    - script: |
+                        if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
+                          echo "##vso[task.setvariable variable=env;isOutput=true]prd"
+                        else
+                          echo "##vso[task.setvariable variable=env;isOutput=true]dev"
+                        fi
+                      displayName: 'Set environment variable (env) based on branch'
+                      name: SetEnv
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
             inputs:
@@ -74,6 +79,8 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
               args: '-var-file=$(System.DefaultWorkingDirectory)/terraform/$(env).tfvars'
+            env:
+              env: $(env)
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
@@ -83,3 +90,5 @@ stages:
               environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               args: '-auto-approve -var-file=$(System.DefaultWorkingDirectory)/terraform/$(env).tfvars'
+            env:
+              env: $(env)
