@@ -67,32 +67,19 @@ stages:
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
 
-          - script: |
-              cd ./terraform
-              if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
-                TFVARS=prd.tfvars
-              else
-                TFVARS=dev.tfvars
-              fi
-              terraform plan -var-file=$TFVARS -out=tfplan
-            displayName: 'Terraform Plan (with tfvars)'
-            env:
-              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-              ARM_TENANT_ID: $(ARM_TENANT_ID)
-              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+            displayName: 'Terraform Plan'
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+              environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
 
-          - script: |
-              cd ./terraform
-              if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
-                TFVARS=prd.tfvars
-              else
-                TFVARS=dev.tfvars
-              fi
-              terraform apply -auto-approve tfplan
-            displayName: 'Terraform Apply (with tfvars)'
-            env:
-              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-              ARM_TENANT_ID: $(ARM_TENANT_ID)
-              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+            displayName: 'Terraform Apply'
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+              args: '-auto-approve'
