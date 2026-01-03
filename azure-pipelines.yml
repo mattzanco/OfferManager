@@ -67,25 +67,22 @@ stages:
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
 
-          - script: bash ./terraform/set-workspace.sh
-            displayName: 'Select Terraform Workspace (dev/prd) before Plan'
-            workingDirectory: '$(System.DefaultWorkingDirectory)'
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
-            displayName: 'Terraform Plan'
-            inputs:
-              provider: 'azurerm'
-              command: 'plan'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+          - script: |
+              cd ./terraform
+              if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
+                TFVARS=prd.tfvars
+              else
+                TFVARS=dev.tfvars
+              fi
+              terraform plan -var-file=$TFVARS -out=tfplan
+            displayName: 'Terraform Plan (with tfvars)'
 
-          - script: bash ./terraform/set-workspace.sh
-            displayName: 'Select Terraform Workspace (dev/prd) before Apply'
-            workingDirectory: '$(System.DefaultWorkingDirectory)'
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
-            displayName: 'Terraform Apply'
-            inputs:
-              provider: 'azurerm'
-              command: 'apply'
-              environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve'
+          - script: |
+              cd ./terraform
+              if [ "$BUILD_SOURCEBRANCH" = "refs/heads/main" ]; then
+                TFVARS=prd.tfvars
+              else
+                TFVARS=dev.tfvars
+              fi
+              terraform apply -auto-approve tfplan
+            displayName: 'Terraform Apply (with tfvars)'

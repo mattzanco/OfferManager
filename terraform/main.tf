@@ -15,13 +15,13 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name = substr(replace(lower("${var.app_name}-${terraform.workspace}-rg"), "_", "-"), 0, 24)
+  name = substr(replace(lower("${var.app_name}-${var.env}-rg"), "_", "-"), 0, 24)
   location = var.location
 }
 
 # Azure Key Vault for the app
 resource "azurerm_key_vault" "app" {
-  name = substr(replace(lower("${var.app_name}-${terraform.workspace}-kv"), "_", "-"), 0, 24)
+  name = substr(replace(lower("${var.app_name}-${var.env}-kv"), "_", "-"), 0, 24)
   location                    = azurerm_resource_group.main.location
   resource_group_name         = azurerm_resource_group.main.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
@@ -35,7 +35,7 @@ resource "random_password" "sql_admin" {
 }
 
 resource "azurerm_mssql_server" "main" {
-  name = substr(replace(lower("${var.app_name}-${terraform.workspace}-sqlsrv"), "_", "-"), 0, 24)
+  name = substr(replace(lower("${var.app_name}-${var.env}-sqlsrv"), "_", "-"), 0, 24)
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
   version                      = "12.0"
@@ -44,7 +44,7 @@ resource "azurerm_mssql_server" "main" {
 }
 
 resource "azurerm_mssql_database" "main" {
-  name = substr(replace(lower("${var.app_name}-${terraform.workspace}-sqldb"), "_", "-"), 0, 24)
+  name = substr(replace(lower("${var.app_name}-${var.env}-sqldb"), "_", "-"), 0, 24)
   server_id           = azurerm_mssql_server.main.id
   sku_name            = "S0"
   collation           = "SQL_Latin1_General_CP1_CI_AS"
