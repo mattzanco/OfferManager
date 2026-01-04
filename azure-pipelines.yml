@@ -71,7 +71,7 @@ stages:
               backendAzureRmResourceGroupName: 'tfstate-rg'
               backendAzureRmStorageAccountName: 'tfstatestorage'
               backendAzureRmContainerName: 'tfstate'
-              backendAzureRmKey: 'terraform.tfstate'
+              backendAzureRmKey: 'terraform-$(SetEnv.terraform_env).tfstate'
 
           - script: |
               echo "terraform_env is: $terraform_env"
