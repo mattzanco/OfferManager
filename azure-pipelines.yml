@@ -48,60 +48,43 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-        - script: |
-            sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
-            wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
-            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-            sudo apt-get update && sudo apt-get install -y terraform
-            terraform -version
-          displayName: 'Install Terraform CLI'
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+          displayName: 'Install Terraform'
+          inputs:
+            terraformVersion: 'latest'
         - script: |
             if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
               echo "##vso[task.setvariable variable=terraform_env]prd"
-              export terraform_env=prd
             else
               echo "##vso[task.setvariable variable=terraform_env]dev"
-              export terraform_env=dev
             fi
-            echo "terraform_env set to: $terraform_env"
           displayName: 'Set terraform_env variable'
           env:
             BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
-        - script: |
-            terraform -chdir=terraform init -backend-config="resource_group_name=tfstate-rg" -backend-config="storage_account_name=tfstatestorage" -backend-config="container_name=tfstate" -backend-config="key=terraform.tfstate" -backend-config="subscription_id=$ARM_SUBSCRIPTION_ID" -backend-config="client_id=$ARM_CLIENT_ID" -backend-config="client_secret=$ARM_CLIENT_SECRET" -backend-config="tenant_id=$ARM_TENANT_ID"
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
           displayName: 'Terraform Init'
-          env:
-            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-            ARM_TENANT_ID: $(ARM_TENANT_ID)
-        - script: |
-            echo "terraform_env is: $terraform_env"
-            terraform -chdir=terraform plan \
-              -var="env=$terraform_env" \
-              -var="client_id=$ARM_CLIENT_ID" \
-              -var="client_secret=$ARM_CLIENT_SECRET" \
-              -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
-              -var="tenant_id=$ARM_TENANT_ID"
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            backendServiceArm: 'HireMattServiceConnection'
+            backendAzureRmResourceGroupName: 'tfstate-rg'
+            backendAzureRmStorageAccountName: 'tfstatestorage'
+            backendAzureRmContainerName: 'tfstate'
+            backendAzureRmKey: 'terraform.tfstate'
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
           displayName: 'Terraform Plan'
-          env:
-            terraform_env: $(terraform_env)
-            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-            ARM_TENANT_ID: $(ARM_TENANT_ID)
-        - script: |
-            echo "terraform_env is: $terraform_env"
-            terraform -chdir=terraform apply -auto-approve \
-              -var="env=$terraform_env" \
-              -var="client_id=$ARM_CLIENT_ID" \
-              -var="client_secret=$ARM_CLIENT_SECRET" \
-              -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
-              -var="tenant_id=$ARM_TENANT_ID"
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            environmentServiceNameAzureRM: 'HireMattServiceConnection'
+            commandOptions: '-var="env=$(terraform_env)"'
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
           displayName: 'Terraform Apply'
-          env:
-            terraform_env: $(terraform_env)
-            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-            ARM_TENANT_ID: $(ARM_TENANT_ID)
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            environmentServiceNameAzureRM: 'HireMattServiceConnection'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            args: '-auto-approve -var="env=$(terraform_env)"'
