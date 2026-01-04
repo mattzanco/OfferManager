@@ -81,6 +81,13 @@ stages:
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
               commandOptions: '-var="env=$(terraform_env)"'
           - script: |
+              if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
+                echo "##vso[task.setvariable variable=terraform_env]prd"
+              else
+                echo "##vso[task.setvariable variable=terraform_env]dev"
+              fi
+            displayName: 'Set terraform_env variable based on branch'
+          - script: |
               echo "terraform_env is: $terraform_env"
             displayName: 'Echo terraform_env for debugging'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
