@@ -13,6 +13,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  terraform_env: ${{ if eq(variables['Build.SourceBranchName'], 'main') }}prd${{ else }}dev
 
 
 stages:
@@ -47,13 +48,6 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - script: |
-              if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
-                echo "##vso[task.setvariable variable=terraform_env]prd"
-              else
-                echo "##vso[task.setvariable variable=terraform_env]dev"
-              fi
-            displayName: 'Set terraform_env variable based on branch'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
