@@ -54,14 +54,10 @@ stages:
                 echo "##vso[task.setvariable variable=terraform_env]dev"
               fi
             displayName: 'Set terraform_env variable based on branch'
-        steps:
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
               terraformVersion: 'latest'
-
-          # Removed script step for setting terraform_env, now set as job variable
-
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Init'
             inputs:
@@ -73,13 +69,9 @@ stages:
               backendAzureRmStorageAccountName: 'tfstatestorage'
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
-
           - script: |
               echo "terraform_env is: $terraform_env"
             displayName: 'Echo terraform_env for debugging'
-            env:
-              terraform_env: $(SetEnv.terraform_env)
-
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Plan'
             inputs:
@@ -88,13 +80,9 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
               commandOptions: '-var="env=$(terraform_env)"'
-
           - script: |
               echo "terraform_env is: $terraform_env"
             displayName: 'Echo terraform_env for debugging'
-            env:
-              terraform_env: $(SetEnv.terraform_env)
-
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
             inputs:
