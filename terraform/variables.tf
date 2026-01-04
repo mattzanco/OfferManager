@@ -1,3 +1,9 @@
+# Azure Subscription ID
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+  default     = "caeb9f7e-fb54-4eb0-901c-5eeaac1e68d0"
+}
 # Environment variable for deployment
 variable "env" {
   description = "Deployment environment (e.g., dev, prod)"
