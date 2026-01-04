@@ -15,7 +15,6 @@ variables:
   buildConfiguration: 'Release'
 
 
-
 stages:
   - stage: BuildAndTest
     displayName: 'Build and Test'
@@ -48,43 +47,36 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
-          displayName: 'Install Terraform'
-          inputs:
-            terraformVersion: 'latest'
-        - script: |
-            if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
-              echo "##vso[task.setvariable variable=terraform_env]prd"
-            else
-              echo "##vso[task.setvariable variable=terraform_env]dev"
-            fi
-          displayName: 'Set terraform_env variable'
-          env:
-            BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
-        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
-          displayName: 'Terraform Init'
-          inputs:
-            provider: 'azurerm'
-            command: 'init'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-            backendServiceArm: 'HireMattServiceConnection'
-            backendAzureRmResourceGroupName: 'tfstate-rg'
-            backendAzureRmStorageAccountName: 'tfstatestorage'
-            backendAzureRmContainerName: 'tfstate'
-            backendAzureRmKey: 'terraform.tfstate'
-        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
-          displayName: 'Terraform Plan'
-          inputs:
-            provider: 'azurerm'
-            command: 'plan'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-            environmentServiceNameAzureRM: 'HireMattServiceConnection'
-            commandOptions: '-var="env=$(terraform_env)"'
-        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
-          displayName: 'Terraform Apply'
-          inputs:
-            provider: 'azurerm'
-            command: 'apply'
-            environmentServiceNameAzureRM: 'HireMattServiceConnection'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-            args: '-auto-approve -var="env=$(terraform_env)"'
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+            displayName: 'Install Terraform'
+            inputs:
+              terraformVersion: 'latest'
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+            displayName: 'Terraform Init'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+              backendServiceArm: 'HireMattServiceConnection'   # <-- your service connection name
+              backendAzureRmResourceGroupName: 'tfstate-rg'
+              backendAzureRmStorageAccountName: 'tfstatestorage'
+              backendAzureRmContainerName: 'tfstate'
+              backendAzureRmKey: 'terraform.tfstate'
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+            displayName: 'Terraform Plan'
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+              environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+
+          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+            displayName: 'Terraform Apply'
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+              args: '-auto-approve'
