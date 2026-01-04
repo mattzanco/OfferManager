@@ -27,11 +27,13 @@ resource "azurerm_resource_group" "main" {
 
 # Azure Key Vault for the app
 resource "azurerm_key_vault" "app" {
-  name = substr(replace(lower("${var.app_name}-${var.env}-kv"), "_", "-"), 0, 24)
+  name                        = substr(replace(lower("${var.app_name}-${var.env}-kv"), "_", "-"), 0, 24)
   location                    = azurerm_resource_group.main.location
   resource_group_name         = azurerm_resource_group.main.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
+  access_policy               = []
+  enable_rbac_authorization   = true
 }
 
 # SQL admin credentials (for demo, use Key Vault or secure method in production)
