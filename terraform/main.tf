@@ -14,7 +14,8 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name = substr(replace(lower("${var.app_name}-${var.env}-rg"), "_", "-"), 0, 24)
+  # Only allow alphanumeric, dash, underscore, parentheses, and periods
+  name = substr(regexreplace(lower("${var.app_name}-${var.env}-rg"), "[^a-z0-9\-_.()]", ""), 0, 24)
   location = var.location
 }
 
