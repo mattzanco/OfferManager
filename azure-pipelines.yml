@@ -79,24 +79,16 @@ stages:
             env:
               terraform_env: $(SetEnv.terraform_env)
 
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+          - script: |
+              terraform plan -var="env=$terraform_env"
             displayName: 'Terraform Plan'
-            inputs:
-              provider: 'azurerm'
-              command: 'plan'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
-              commandOptions: '-var="env=$terraform_env"'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
             env:
               terraform_env: $(SetEnv.terraform_env)
 
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+          - script: |
+              terraform apply -auto-approve -var="env=$terraform_env"
             displayName: 'Terraform Apply'
-            inputs:
-              provider: 'azurerm'
-              command: 'apply'
-              environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve -var="env=$terraform_env"'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
             env:
               terraform_env: $(SetEnv.terraform_env)
