@@ -58,6 +58,15 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+          - powershell: |
+              $tfvarsPath = "$(System.DefaultWorkingDirectory)/terraform/terraform.tfvars"
+              if (Test-Path $tfvarsPath) {
+                Write-Host "terraform.tfvars contents:"
+                Get-Content $tfvarsPath
+              } else {
+                Write-Host "terraform.tfvars not found at $tfvarsPath"
+              }
+            displayName: 'Show terraform.tfvars contents'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
