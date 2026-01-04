@@ -48,14 +48,19 @@ stages:
 
   - stage: Terraform
     displayName: 'Terraform Infrastructure'
-    variables:
-      terraform_env: $[eq(variables['Build.SourceBranchName'], 'main') ? 'prd' : 'dev']
     jobs:
       - job: Terraform
         displayName: 'Terraform Init, Plan, and Apply'
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+          - script: |
+              if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
+                echo "##vso[task.setvariable variable=terraform_env]prd"
+              else
+                echo "##vso[task.setvariable variable=terraform_env]dev"
+              fi
+            displayName: 'Set terraform_env variable based on branch'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
