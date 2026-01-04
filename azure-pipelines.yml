@@ -25,9 +25,13 @@ stages:
           vmImage: 'windows-latest'
         steps:
           - powershell: |
+              $terraformDir = "$(System.DefaultWorkingDirectory)/terraform"
+              if (!(Test-Path $terraformDir)) {
+                New-Item -ItemType Directory -Path $terraformDir | Out-Null
+              }
               $branch = "$(Build.SourceBranchName)"
               $envValue = if ($branch -eq "main") { "prd" } else { "dev" }
-              Set-Content -Path "$(System.DefaultWorkingDirectory)/terraform/terraform.tfvars" -Value "env = `"$envValue`""
+              Set-Content -Path "$terraformDir/terraform.tfvars" -Value "env = `"$envValue`""
               Write-Host "Set env to '$envValue' in terraform.tfvars based on branch '$branch'"
             displayName: 'Set Terraform env variable'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
