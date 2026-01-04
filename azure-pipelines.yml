@@ -73,6 +73,12 @@ stages:
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
 
+          - script: |
+              echo "terraform_env is: $terraform_env"
+            displayName: 'Echo terraform_env for debugging'
+            env:
+              terraform_env: $(SetEnv.terraform_env)
+
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Plan'
             inputs:
