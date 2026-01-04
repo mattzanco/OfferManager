@@ -46,8 +46,14 @@ stages:
         displayName: 'Terraform Init, Plan, and Apply'
         pool:
           vmImage: 'ubuntu-latest'
-        variables:
-          terraform_env: $[eq(variables['Build.SourceBranchName'], 'main') ? 'prd' : 'dev']
+        # Removed job-level variable, will set terraform_env in a script step
+                  - script: |
+                      if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
+                        echo "##vso[task.setvariable variable=terraform_env]prd"
+                      else
+                        echo "##vso[task.setvariable variable=terraform_env]dev"
+                      fi
+                    displayName: 'Set terraform_env variable based on branch'
         steps:
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
@@ -82,6 +88,12 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
               commandOptions: '-var="env=$(terraform_env)"'
+
+          - script: |
+              echo "terraform_env is: $terraform_env"
+            displayName: 'Echo terraform_env for debugging'
+            env:
+              terraform_env: $(SetEnv.terraform_env)
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
