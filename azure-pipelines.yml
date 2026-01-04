@@ -95,6 +95,4 @@ stages:
               command: 'apply'
               environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve -var="env=$terraform_env"'
-            env:
-              terraform_env: $(SetEnv.terraform_env)
+              args: '-auto-approve -var="env=$(SetEnv.terraform_env)"'
