@@ -14,18 +14,6 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-          - script: |
-              if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
-                echo "##vso[task.setvariable variable=terraform_env]prd"
-                export terraform_env=prd
-              else
-                echo "##vso[task.setvariable variable=terraform_env]dev"
-                export terraform_env=dev
-              fi
-              echo "terraform_env set to: $terraform_env"
-            displayName: 'Set terraform_env variable'
-            env:
-              BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
 
 
 stages:
