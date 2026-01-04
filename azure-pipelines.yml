@@ -46,6 +46,8 @@ stages:
         displayName: 'Terraform Init, Plan, and Apply'
         pool:
           vmImage: 'ubuntu-latest'
+        variables:
+          terraform_env: $[eq(variables['Build.SourceBranchName'], 'main') ? 'prd' : 'dev']
         steps:
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
@@ -63,13 +65,6 @@ stages:
               backendAzureRmStorageAccountName: 'tfstatestorage'
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
-
-          - script: |
-              echo "##vso[task.setvariable variable=terraform_env]dev"
-              if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
-                echo "##vso[task.setvariable variable=terraform_env]prd"
-              fi
-            displayName: 'Set Terraform env variable based on branch'
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Plan'
