@@ -31,7 +31,6 @@ stages:
                 echo "##vso[task.setvariable variable=terraform_env]dev"
               fi
             displayName: 'Set terraform_env variable based on branch'
-            shell: bash
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
             inputs:
