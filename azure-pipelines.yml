@@ -24,6 +24,13 @@ stages:
         pool:
           vmImage: 'windows-latest'
         steps:
+                    - powershell: |
+                        $branch = "$(Build.SourceBranchName)"
+                        $envValue = if ($branch -eq "main") { "prd" } else { "dev" }
+                        Set-Content -Path "$(System.DefaultWorkingDirectory)/terraform/terraform.tfvars" -Value "env = `"$envValue`""
+                        Write-Host "Set env to '$envValue' in terraform.tfvars based on branch '$branch'"
+                      displayName: 'Set Terraform env variable'
+                      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
             inputs:
