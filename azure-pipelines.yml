@@ -83,8 +83,8 @@ stages:
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               backendServiceArm: 'HireMattServiceConnection'   # <-- your service connection name
-              backendAzureRmResourceGroupName: 'tfstate-rg'
-              backendAzureRmStorageAccountName: 'tfstatestorage'
+              backendAzureRmResourceGroupName: 'HireMattResources'
+              backendAzureRmStorageAccountName: 'hirematttfstatestorage'
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
 
