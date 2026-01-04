@@ -64,6 +64,14 @@ stages:
               backendAzureRmContainerName: 'tfstate'
               backendAzureRmKey: 'terraform.tfstate'
 
+          - script: |
+              echo "##vso[task.setvariable variable=terraform_env]dev"
+              if [ "$BUILD_SOURCEBRANCHNAME" = "main" ]; then
+                echo "##vso[task.setvariable variable=terraform_env]prd"
+              fi
+            displayName: 'Set Terraform env variable based on branch'
+            shell: bash
+
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Plan'
             inputs:
@@ -71,6 +79,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+              commandOptions: '-var="env=$(terraform_env)"'
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
@@ -79,4 +88,4 @@ stages:
               command: 'apply'
               environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve'
+              args: '-auto-approve -var="env=$(terraform_env)"'
