@@ -14,17 +14,6 @@ variable "subscription_id" {
   description = "Azure subscription ID"
   type        = string
 }
-
-variable "tenant_id" {
-  description = "Azure tenant ID"
-  type        = string
-}
-# Environment name (dev, prd, etc.)
-variable "env" {
-  default     = "dev"
-  description = "Environment name for resource naming (e.g., dev, prd)"
-  type        = string
-  validation {
     condition     = can(regex("^[a-zA-Z0-9_.()-]+$", var.env))
     error_message = "The env variable may only contain alphanumeric characters, dashes, underscores, parentheses, and periods."
   }
