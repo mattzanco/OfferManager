@@ -86,7 +86,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
-              commandOptions: '-var="env=$(terraform_env)"'
+              commandOptions: '-var="env=$terraform_env"'
             env:
               terraform_env: $(SetEnv.terraform_env)
 
@@ -97,6 +97,6 @@ stages:
               command: 'apply'
               environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve -var="env=$(terraform_env)"'
+              args: '-auto-approve -var="env=$terraform_env"'
             env:
               terraform_env: $(SetEnv.terraform_env)
