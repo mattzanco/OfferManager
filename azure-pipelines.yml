@@ -13,6 +13,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  terraform_env: ${{ if eq(variables['Build.SourceBranchName'], 'main') }}'prd'${{ else }}'dev'
 
 
 stages:
