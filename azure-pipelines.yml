@@ -86,9 +86,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
-              commandOptions: '-var="env=$terraform_env"'
-            env:
-              terraform_env: $(SetEnv.terraform_env)
+              commandOptions: '-var="env=$(SetEnv.terraform_env)"'
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Apply'
