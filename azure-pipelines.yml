@@ -77,13 +77,31 @@ stages:
             ARM_TENANT_ID: $(ARM_TENANT_ID)
         - script: |
             echo "terraform_env is: $terraform_env"
-            terraform -chdir=terraform plan -var="env=$terraform_env"
+            terraform -chdir=terraform plan \
+              -var="env=$terraform_env" \
+              -var="client_id=$ARM_CLIENT_ID" \
+              -var="client_secret=$ARM_CLIENT_SECRET" \
+              -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
+              -var="tenant_id=$ARM_TENANT_ID"
           displayName: 'Terraform Plan'
           env:
             terraform_env: $(terraform_env)
+            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+            ARM_TENANT_ID: $(ARM_TENANT_ID)
         - script: |
             echo "terraform_env is: $terraform_env"
-            terraform -chdir=terraform apply -auto-approve -var="env=$terraform_env"
+            terraform -chdir=terraform apply -auto-approve \
+              -var="env=$terraform_env" \
+              -var="client_id=$ARM_CLIENT_ID" \
+              -var="client_secret=$ARM_CLIENT_SECRET" \
+              -var="subscription_id=$ARM_SUBSCRIPTION_ID" \
+              -var="tenant_id=$ARM_TENANT_ID"
           displayName: 'Terraform Apply'
           env:
             terraform_env: $(terraform_env)
+            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+            ARM_TENANT_ID: $(ARM_TENANT_ID)
