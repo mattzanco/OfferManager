@@ -1,19 +1,8 @@
-# Azure service principal authentication variables
-variable "client_id" {
-  description = "Azure service principal client ID"
+# Environment variable for deployment
+variable "env" {
+  description = "Deployment environment (e.g., dev, prod)"
   type        = string
-}
-
-variable "client_secret" {
-  description = "Azure service principal client secret"
-  type        = string
-  sensitive   = true
-}
-
-variable "subscription_id" {
-  description = "Azure subscription ID"
-  type        = string
-}
+  validation {
     condition     = can(regex("^[a-zA-Z0-9_.()-]+$", var.env))
     error_message = "The env variable may only contain alphanumeric characters, dashes, underscores, parentheses, and periods."
   }
