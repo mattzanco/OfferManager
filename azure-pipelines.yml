@@ -58,15 +58,19 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          - powershell: |
-              $tfvarsPath = "$(System.DefaultWorkingDirectory)/terraform/terraform.tfvars"
-              if (Test-Path $tfvarsPath) {
-                Write-Host "terraform.tfvars contents:"
-                Get-Content $tfvarsPath
-              } else {
-                Write-Host "terraform.tfvars not found at $tfvarsPath"
-              }
-            displayName: 'Show terraform.tfvars contents'
+          - bash: |
+              tfvarsPath="$(System.DefaultWorkingDirectory)/terraform/terraform.tfvars"
+              branch="$(Build.SourceBranchName)"
+              if [ "$branch" = "main" ]; then
+                envValue="prd"
+              else
+                envValue="dev"
+              fi
+              echo "env = \"$envValue\"" > "$tfvarsPath"
+              echo "Set env to '$envValue' in terraform.tfvars based on branch '$branch'"
+              echo "terraform.tfvars contents:"
+              cat "$tfvarsPath"
+            displayName: 'Set and show terraform.tfvars env variable'
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
             displayName: 'Install Terraform'
             inputs:
