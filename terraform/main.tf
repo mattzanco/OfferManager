@@ -3,7 +3,7 @@ terraform {
     resource_group_name  = "HireMattResources"
     storage_account_name = "hirematttfstatestorage"
     container_name       = "tfstate"
-    key                  = "terraform.tfstate-${var.env}"
+    key                  = "offermanager.tfstate-${var.env}"
   }
   required_providers {
     azurerm = {
