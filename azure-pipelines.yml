@@ -71,32 +71,30 @@ stages:
               echo "terraform.tfvars contents:"
               cat "$tfvarsPath"
             displayName: 'Set and show terraform.tfvars env variable'
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+          - task: TerraformCLI@0
             displayName: 'Install Terraform'
             inputs:
               terraformVersion: 'latest'
 
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+          - task: TerraformCLI@0
             displayName: 'Terraform Init'
             inputs:
-              provider: 'azurerm'
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              backendServiceArm: 'HireMattServiceConnection'
+              allowTelemetryCollection: false
 
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+          - task: TerraformCLI@0
             displayName: 'Terraform Plan'
             inputs:
-              provider: 'azurerm'
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              environmentServiceNameAzureRM: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+              environmentServiceName: 'HireMattServiceConnection'  # <-- ARM service connection NAME
 
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+          - task: TerraformCLI@0
             displayName: 'Terraform Apply'
             inputs:
-              provider: 'azurerm'
               command: 'apply'
-              environmentServiceNameAzureRM: 'HireMattServiceConnection' # Set your Azure service connection name here
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              args: '-auto-approve'
+              environmentServiceName: 'HireMattServiceConnection' # Set your Azure service connection name here
+              allowTelemetryCollection: false
+              commandOptions: '-auto-approve'
