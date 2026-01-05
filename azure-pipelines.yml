@@ -84,6 +84,11 @@ stages:
               terraform --version
             displayName: 'Install Terraform'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
 
           - powershell: |
               $envValue = if ("$(Build.SourceBranchName)" -eq "main") { "prd" } else { "dev" }
@@ -91,13 +96,28 @@ stages:
               terraform init -backend-config="key=$keyValue"
             displayName: 'Terraform Init'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
 
           - powershell: |
               terraform plan
             displayName: 'Terraform Plan'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
 
           - powershell: |
               terraform apply -auto-approve
             displayName: 'Terraform Apply'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
