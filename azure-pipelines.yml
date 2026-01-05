@@ -82,11 +82,6 @@ stages:
               provider: 'azurerm'
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              backendServiceArm: 'HireMattServiceConnection'   # <-- your service connection name
-              backendAzureRmResourceGroupName: 'HireMattResources'
-              backendAzureRmStorageAccountName: 'hirematttfstatestorage'
-              backendAzureRmContainerName: 'tfstate'
-              backendAzureRmKey: 'terraform.tfstate'
 
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
             displayName: 'Terraform Plan'
