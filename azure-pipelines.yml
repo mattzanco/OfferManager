@@ -71,26 +71,26 @@ stages:
               echo "terraform.tfvars contents:"
               cat "$tfvarsPath"
             displayName: 'Set and show terraform.tfvars env variable'
-          - task: TerraformCLI@0
+          - task: Terraform@0
             displayName: 'Install Terraform'
             inputs:
               terraformVersion: 'latest'
 
-          - task: TerraformCLI@0
+          - task: Terraform@0
             displayName: 'Terraform Init'
             inputs:
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               allowTelemetryCollection: false
 
-          - task: TerraformCLI@0
+          - task: Terraform@0
             displayName: 'Terraform Plan'
             inputs:
               command: 'plan'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
               environmentServiceName: 'HireMattServiceConnection'  # <-- ARM service connection NAME
 
-          - task: TerraformCLI@0
+          - task: Terraform@0
             displayName: 'Terraform Apply'
             inputs:
               command: 'apply'
