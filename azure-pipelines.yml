@@ -86,7 +86,9 @@ stages:
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
 
           - powershell: |
-              terraform init
+              $envValue = if ("$(Build.SourceBranchName)" -eq "main") { "prd" } else { "dev" }
+              $keyValue = "offermanager.tfstate-$envValue"
+              terraform init -backend-config="key=$keyValue"
             displayName: 'Terraform Init'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
 
