@@ -71,30 +71,18 @@ stages:
               echo "terraform.tfvars contents:"
               cat "$tfvarsPath"
             displayName: 'Set and show terraform.tfvars env variable'
-          - task: Terraform@0
-            displayName: 'Install Terraform'
-            inputs:
-              terraformVersion: 'latest'
-
-          - task: Terraform@0
+          - powershell: |
+              terraform --version
+              terraform init
             displayName: 'Terraform Init'
-            inputs:
-              command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              allowTelemetryCollection: false
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
 
-          - task: Terraform@0
+          - powershell: |
+              terraform plan
             displayName: 'Terraform Plan'
-            inputs:
-              command: 'plan'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              environmentServiceName: 'HireMattServiceConnection'  # <-- ARM service connection NAME
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
 
-          - task: Terraform@0
+          - powershell: |
+              terraform apply -auto-approve
             displayName: 'Terraform Apply'
-            inputs:
-              command: 'apply'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-              environmentServiceName: 'HireMattServiceConnection' # Set your Azure service connection name here
-              allowTelemetryCollection: false
-              commandOptions: '-auto-approve'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
