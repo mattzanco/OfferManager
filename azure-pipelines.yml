@@ -71,8 +71,21 @@ stages:
               echo "terraform.tfvars contents:"
               cat "$tfvarsPath"
             displayName: 'Set and show terraform.tfvars env variable'
+
           - powershell: |
+              $terraformVersion = "1.7.5"
+              $terraformZip = "terraform_${terraformVersion}_linux_amd64.zip"
+              $downloadUrl = "https://releases.hashicorp.com/terraform/${terraformVersion}/${terraformZip}"
+              $installDir = "/usr/local/bin"
+              Invoke-WebRequest -Uri $downloadUrl -OutFile $terraformZip
+              Expand-Archive -Path $terraformZip -DestinationPath "."
+              Move-Item -Path "./terraform" -Destination $installDir
+              Remove-Item $terraformZip
               terraform --version
+            displayName: 'Install Terraform'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+
+          - powershell: |
               terraform init
             displayName: 'Terraform Init'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
