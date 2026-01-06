@@ -149,4 +149,3 @@ stages:
               arguments: '-c Release --no-build'
             env:
               ASPNETCORE_ENVIRONMENT: $[ if(eq(variables['Build.SourceBranchName'], 'main'), 'Production', 'Development') ]
-              DbConnectionString: $(DbConnectionString)

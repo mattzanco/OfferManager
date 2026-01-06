@@ -5,37 +5,35 @@ using DbUp;
 // Get connection string
 string connectionString;
 
-// First, try to get from environment variable (pipeline passes this)
-string envConnectionString = Environment.GetEnvironmentVariable("DbConnectionString");
-if (!string.IsNullOrEmpty(envConnectionString))
+// Determine environment
+string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+string keyVaultName = environment == "Production"
+    ? "offermanager-prd-kv"
+    : "offermanager-dev-kv";
+
+string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
+Console.WriteLine($"Attempting to retrieve DbConnectionString from Key Vault: {keyVaultName}");
+
+try
 {
-    connectionString = envConnectionString;
-    Console.WriteLine("Using connection string from environment variable");
+    var credential = new DefaultAzureCredential();
+    var client = new SecretClient(new Uri(keyVaultUri), credential);
+    var secret = client.GetSecret("DbConnectionString");
+    connectionString = secret.Value.Value;
+    Console.WriteLine("Successfully retrieved connection string from Key Vault");
 }
-else
+catch (Exception ex)
 {
-    // Try Key Vault as fallback
-    string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-    string keyVaultName = environment == "Development"
-        ? "offermanager-dev-kv"
-        : "offermanager-prd-kv";
+    Console.WriteLine($"Error reading from Key Vault: {ex.Message}");
+    Console.WriteLine("Using default local connection string");
+    connectionString = "Server=localhost;Database=OfferManagerDb;Integrated Security=true;";
+}
 
-    string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
-
-    try
-    {
-        var credential = new DefaultAzureCredential();
-        var client = new SecretClient(new Uri(keyVaultUri), credential);
-        var secret = client.GetSecret("DbConnectionString");
-        connectionString = secret.Value.Value;
-        Console.WriteLine("Successfully retrieved connection string from Key Vault");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error reading from Key Vault: {ex.Message}");
-        Console.WriteLine("Using default local connection string");
-        connectionString = "Server=localhost;Database=OfferManagerDb;Integrated Security=true;";
-    }
+// Validate connection string
+if (string.IsNullOrEmpty(connectionString))
+{
+    Console.WriteLine("ERROR: No valid connection string available!");
+    Environment.Exit(1);
 }
 
 var upgrader = DeployChanges.To
