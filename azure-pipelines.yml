@@ -154,8 +154,10 @@ stages:
               $envValue = if ("$(Build.SourceBranchName)" -eq "main") { "prd" } else { "dev" }
               Write-Host "Running DbUp migrations for environment: $envValue"
               
-              & "$(Build.BinariesDirectory)/Release/net8.0/OfferManager.DbUp.exe"
+              $exePath = "$(Build.SourcesDirectory)\OfferManager.DbUp\bin\Release\net8.0\OfferManager.DbUp.exe"
+              Write-Host "Running DbUp from: $exePath"
+              & $exePath
             displayName: 'Execute DbUp Migrations'
-            workingDirectory: '$(Build.SourcesDirectory)'
+            workingDirectory: '$(Build.SourcesDirectory)\OfferManager.DbUp'
             env:
               DbConnectionString: $(DbConnectionString)
