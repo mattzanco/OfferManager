@@ -135,29 +135,19 @@ stages:
           - task: UseDotNet@2
             inputs:
               version: '8.0.x'
-          - task: NuGetToolInstaller@1
-          - task: NuGetCommand@2
+          - task: DotNetCoreCLI@2
+            displayName: 'Build DbUp Project'
             inputs:
-              restoreSolution: '$(solution)'
-          - task: VSBuild@1
-            inputs:
-              solution: 'OfferManager.DbUp/OfferManager.DbUp.csproj'
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
-          - powershell: |
-              $dbConnectionString = $env:DB_CONNECTION_STRING
-              if ([string]::IsNullOrEmpty($dbConnectionString)) {
-                Write-Host "Warning: DB_CONNECTION_STRING not set, using default"
-                $dbConnectionString = "Server=localhost;Database=OfferManagerDb;Integrated Security=true;"
-              }
-              
-              $envValue = if ("$(Build.SourceBranchName)" -eq "main") { "prd" } else { "dev" }
-              Write-Host "Running DbUp migrations for environment: $envValue"
-              
-              $exePath = "$(Build.SourcesDirectory)\OfferManager.DbUp\bin\Release\net8.0\OfferManager.DbUp.exe"
-              Write-Host "Running DbUp from: $exePath"
-              & $exePath
+              command: 'build'
+              projects: 'OfferManager.DbUp/OfferManager.DbUp.csproj'
+              arguments: '-c Release'
+          - task: DotNetCoreCLI@2
             displayName: 'Execute DbUp Migrations'
-            workingDirectory: '$(Build.SourcesDirectory)\OfferManager.DbUp'
+            inputs:
+              command: 'run'
+              projects: 'OfferManager.DbUp/OfferManager.DbUp.csproj'
+              arguments: '-c Release --no-build'
             env:
+              ASPNETCORE_ENVIRONMENT: ${{ if eq(variables['Build.SourceBranchName'], 'main') then 'Production' else 'Development' }}
+              DbConnectionString: $(DbConnectionString)
               DbConnectionString: $(DbConnectionString)
