@@ -148,6 +148,5 @@ stages:
               projects: 'OfferManager.DbUp/OfferManager.DbUp.csproj'
               arguments: '-c Release --no-build'
             env:
-              ASPNETCORE_ENVIRONMENT: ${{ if eq(variables['Build.SourceBranchName'], 'main') then 'Production' else 'Development' }}
-              DbConnectionString: $(DbConnectionString)
+              ASPNETCORE_ENVIRONMENT: $[ if(eq(variables['Build.SourceBranchName'], 'main'), 'Production', 'Development') ]
               DbConnectionString: $(DbConnectionString)
