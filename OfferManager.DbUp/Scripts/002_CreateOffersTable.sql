@@ -1,9 +1,9 @@
--- Create Offers table
+-- Create Offer table
 -- Stores offer information linked to users
 
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Offers' AND schema_id = SCHEMA_ID('OfferManager'))
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Offer' AND schema_id = SCHEMA_ID('OfferManager'))
 BEGIN
-    CREATE TABLE offermanager.Offers (
+    CREATE TABLE OfferManager.Offer (
         OfferId INT IDENTITY(1,1) PRIMARY KEY,
         UserId INT NOT NULL,
         Title NVARCHAR(255) NOT NULL,
@@ -11,11 +11,11 @@ BEGIN
         Status NVARCHAR(50) NOT NULL,
         CreatedDate DATETIME2 DEFAULT GETUTCDATE(),
         UpdatedDate DATETIME2 DEFAULT GETUTCDATE(),
-        FOREIGN KEY (UserId) REFERENCES offermanager.Users(UserId)
+        FOREIGN KEY (UserId) REFERENCES OfferManager.User(UserId)
     );
-    PRINT 'Created table: OfferManager.Offers'
+    PRINT 'Created table: OfferManager.Offer'
 END
 ELSE
 BEGIN
-    PRINT 'Table OfferManager.Offers already exists'
+    PRINT 'Table OfferManager.Offer already exists'
 END
