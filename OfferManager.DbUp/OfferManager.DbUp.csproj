@@ -13,4 +13,8 @@
     <PackageReference Include="dbup" Version="5.0.41" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <None Update="Scripts\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup></Project>
