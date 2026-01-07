@@ -45,10 +45,18 @@ stages:
               msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(Build.ArtifactStagingDirectory)/WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
               platform: '$(buildPlatform)'
               configuration: '$(buildConfiguration)'
+            env:
+              AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZURE_TENANT_ID: $(ARM_TENANT_ID)
           - task: VSTest@2
             inputs:
               platform: '$(buildPlatform)'
               configuration: '$(buildConfiguration)'
+            env:
+              AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZURE_TENANT_ID: $(ARM_TENANT_ID)
 
   - stage: Terraform
     displayName: 'Terraform Infrastructure'
@@ -149,3 +157,6 @@ stages:
               arguments: '-c Release --no-build'
             env:
               ASPNETCORE_ENVIRONMENT: $[ if(eq(variables['Build.SourceBranchName'], 'main'), 'Production', 'Development') ]
+              AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZURE_TENANT_ID: $(ARM_TENANT_ID)
