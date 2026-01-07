@@ -36,9 +36,21 @@ if (string.IsNullOrEmpty(connectionString))
     Environment.Exit(1);
 }
 
+// Locate Scripts directory - use AppContext.BaseDirectory for runtime location
+string scriptsPath = Path.Combine(AppContext.BaseDirectory, "Scripts");
+
+// If Scripts not found in runtime directory, try relative to current directory
+if (!Directory.Exists(scriptsPath))
+{
+    scriptsPath = "./Scripts";
+    Console.WriteLine($"Scripts not found in runtime directory, using relative path: {scriptsPath}");
+}
+
+Console.WriteLine($"Using Scripts directory: {Path.GetFullPath(scriptsPath)}");
+
 var upgrader = DeployChanges.To
     .SqlDatabase(connectionString)
-    .WithScriptsFromFileSystem("./Scripts")
+    .WithScriptsFromFileSystem(scriptsPath)
     .WithTransaction()
     .LogToConsole()
     .Build();
