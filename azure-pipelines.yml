@@ -120,6 +120,34 @@ stages:
               ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
               ARM_TENANT_ID: $(ARM_TENANT_ID)
 
+          - task: AzureCLI@2
+            displayName: 'Purge Soft-Deleted Key Vault Secrets'
+            inputs:
+              azureSubscription: 'AzureResourceManagerConnection'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                $keyVaultName = if ("$(Build.SourceBranchName)" -eq "main") { "offermanager-prd-kv" } else { "offermanager-dev-kv" }
+                
+                Write-Host "Purging soft-deleted secrets from Key Vault: $keyVaultName"
+                
+                # Get all soft-deleted secrets
+                $deletedSecrets = az keyvault secret list-deleted --vault-name $keyVaultName --query "[].name" -o tsv
+                
+                if ($deletedSecrets) {
+                    foreach ($secret in $deletedSecrets) {
+                        Write-Host "Purging soft-deleted secret: $secret"
+                        az keyvault secret purge --vault-name $keyVaultName --name $secret --yes
+                    }
+                } else {
+                    Write-Host "No soft-deleted secrets found"
+                }
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
           - powershell: |
               terraform apply -auto-approve
             displayName: 'Terraform Apply'
@@ -151,7 +179,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Add Firewall Rule for Agent IP'
             inputs:
-              azureSubscription: 'AzureResourceManagerConnection'
+              azureSubscription: 'HireMattServiceConnection'
               scriptType: 'ps'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -197,7 +225,7 @@ stages:
             displayName: 'Remove Firewall Rule'
             condition: always()
             inputs:
-              azureSubscription: 'AzureResourceManagerConnection'
+              azureSubscription: 'HireMattServiceConnection'
               scriptType: 'ps'
               scriptLocation: 'inlineScript'
               inlineScript: |
