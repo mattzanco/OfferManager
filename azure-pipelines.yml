@@ -209,8 +209,7 @@ stages:
                 az sql server firewall-rule delete `
                   --resource-group $resourceGroup `
                   --server $sqlServer `
-                  --name $ruleName `
-                  --yes
+                  --name $ruleName
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
               ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
