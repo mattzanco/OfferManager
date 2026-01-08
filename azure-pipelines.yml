@@ -124,24 +124,28 @@ stages:
             displayName: 'Purge Soft-Deleted Key Vault Secrets'
             inputs:
               azureSubscription: 'HireMattServiceConnection'
-              scriptType: 'ps'
+              scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                $keyVaultName = if ("$(Build.SourceBranchName)" -eq "main") { "offermanager-prd-kv" } else { "offermanager-dev-kv" }
+                if [ "$(Build.SourceBranchName)" = "main" ]; then
+                  keyVaultName="offermanager-prd-kv"
+                else
+                  keyVaultName="offermanager-dev-kv"
+                fi
                 
-                Write-Host "Purging soft-deleted secrets from Key Vault: $keyVaultName"
+                echo "Purging soft-deleted secrets from Key Vault: $keyVaultName"
                 
                 # Get all soft-deleted secrets
-                $deletedSecrets = az keyvault secret list-deleted --vault-name $keyVaultName --query "[].name" -o tsv
+                deletedSecrets=$(az keyvault secret list-deleted --vault-name $keyVaultName --query "[].name" -o tsv)
                 
-                if ($deletedSecrets) {
-                    foreach ($secret in $deletedSecrets) {
-                        Write-Host "Purging soft-deleted secret: $secret"
-                        az keyvault secret purge --vault-name $keyVaultName --name $secret --yes
-                    }
-                } else {
-                    Write-Host "No soft-deleted secrets found"
-                }
+                if [ -n "$deletedSecrets" ]; then
+                    while IFS= read -r secret; do
+                        echo "Purging soft-deleted secret: $secret"
+                        az keyvault secret purge --vault-name $keyVaultName --name "$secret" --yes
+                    done <<< "$deletedSecrets"
+                else
+                    echo "No soft-deleted secrets found"
+                fi
             env:
               ARM_CLIENT_ID: $(ARM_CLIENT_ID)
               ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
