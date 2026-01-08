@@ -34,6 +34,7 @@ resource "azurerm_key_vault" "app" {
   sku_name                    = "standard"
   access_policy               = []
   enable_rbac_authorization   = true
+  purge_on_destroy            = true
 }
 
 # SQL admin credentials (for demo, use Key Vault or secure method in production)

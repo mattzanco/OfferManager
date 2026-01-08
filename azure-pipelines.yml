@@ -120,34 +120,6 @@ stages:
               ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
               ARM_TENANT_ID: $(ARM_TENANT_ID)
 
-          - task: AzureCLI@2
-            displayName: 'Delete Soft-Deleted DbConnectionString Secret'
-            inputs:
-              azureSubscription: 'HireMattServiceConnection'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                if [ "$(Build.SourceBranchName)" = "main" ]; then
-                  keyVaultName="offermanager-prd-kv"
-                else
-                  keyVaultName="offermanager-dev-kv"
-                fi
-                
-                secretName="DbConnectionString"
-                
-                echo "Cleaning up $secretName secret in Key Vault: $keyVaultName"
-                
-                # Only purge any soft-deleted version, don't delete the active secret
-                echo "Attempting to purge soft-deleted secret: $secretName"
-                az keyvault secret purge --vault-name $keyVaultName --name $secretName --yes 2>/dev/null && echo "Purged soft-deleted secret" || echo "No soft-deleted version found"
-                
-                echo "Secret purge complete"
-            env:
-              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-              ARM_TENANT_ID: $(ARM_TENANT_ID)
-
           - powershell: |
               terraform apply -auto-approve
             displayName: 'Terraform Apply'
