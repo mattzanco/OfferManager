@@ -11,7 +11,7 @@ BEGIN
         Status NVARCHAR(50) NOT NULL,
         CreatedDate DATETIME2 DEFAULT GETUTCDATE(),
         UpdatedDate DATETIME2 DEFAULT GETUTCDATE(),
-        FOREIGN KEY (UserId) REFERENCES offermanager.User(UserId)
+        FOREIGN KEY (UserId) REFERENCES offermanager.[User](UserId)
     );
     PRINT 'Created table: offermanager.Offer'
 END
