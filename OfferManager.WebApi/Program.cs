@@ -31,13 +31,29 @@ catch (Exception ex)
 }
 
 // Example: Read DB connection string from Key Vault (or fallback to appsettings)
+
 string? dbConnectionString = builder.Configuration["DbConnectionString"];
 if (string.IsNullOrEmpty(dbConnectionString))
 {
     Console.WriteLine("Warning: DbConnectionString not found in configuration");
 }
 
+
+// Register repositories for dependency injection
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.IOfferRepository, OfferManager.Storage.Repositories.OfferRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.IUserRepository, OfferManager.Storage.Repositories.UserRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.ICustomerRepository, OfferManager.Storage.Repositories.CustomerRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.IOrganizationRepository, OfferManager.Storage.Repositories.OrganizationRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.IRfqRepository, OfferManager.Storage.Repositories.RfqRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.ILaneRepository, OfferManager.Storage.Repositories.LaneRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.ICustomerContactRepository, OfferManager.Storage.Repositories.CustomerContactRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.ILocationRepository, OfferManager.Storage.Repositories.LocationRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.ILoadRepository, OfferManager.Storage.Repositories.LoadRepository>();
+builder.Services.AddScoped<OfferManager.Domain.Interfaces.IDocumentRepository, OfferManager.Storage.Repositories.DocumentRepository>();
+
+
 // Add services to the container.
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -50,9 +66,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
-app.MapGet("/ping", () => true)
-    .WithName("Ping");
+app.UseHttpsRedirection();
+app.MapControllers();
+
+
 
 app.Run();

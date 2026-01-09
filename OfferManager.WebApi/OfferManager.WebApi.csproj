@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OfferManager.Domain\OfferManager.Domain.csproj" />
+    <ProjectReference Include="..\OfferManager.Storage\OfferManager.Storage.csproj" />
   </ItemGroup>
 
 </Project>
