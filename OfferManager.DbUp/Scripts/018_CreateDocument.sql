@@ -12,7 +12,7 @@ CREATE TABLE offermanager.Document (
     UploadedByUserId UNIQUEIDENTIFIER NOT NULL,
     UploadedAt DATETIME2(3) NOT NULL CONSTRAINT DF_Document_UploadedAt DEFAULT SYSUTCDATETIME(),
     CONSTRAINT FK_Document_Organization FOREIGN KEY (OrganizationId) REFERENCES offermanager.Organization(OrganizationId),
-    CONSTRAINT FK_Document_UploadedBy FOREIGN KEY (UploadedByUserId) REFERENCES offermanager.User(UserId)
+    CONSTRAINT FK_Document_UploadedBy FOREIGN KEY (UploadedByUserId) REFERENCES offermanager.[User](UserId)
 );
 
 CREATE INDEX IX_Document_Org_Entity ON offermanager.Document (OrganizationId, EntityType, EntityId, UploadedAt DESC);

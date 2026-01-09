@@ -17,7 +17,7 @@ CREATE TABLE offermanager.Offer (
     CONSTRAINT FK_Offer_Customer FOREIGN KEY (CustomerId)
         REFERENCES offermanager.Customer(CustomerId),
     CONSTRAINT FK_Offer_CreatedBy FOREIGN KEY (CreatedByUserId)
-        REFERENCES offermanager.User(UserId),
+        REFERENCES offermanager.[User](UserId),
     CONSTRAINT CK_Offer_Status CHECK (Status IN (
         N'Draft', N'Sent', N'Revised', N'Accepted', N'Declined', N'Expired', N'Booked', N'Archived'
     ))

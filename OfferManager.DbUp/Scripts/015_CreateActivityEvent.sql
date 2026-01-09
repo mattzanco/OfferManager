@@ -13,7 +13,7 @@ CREATE TABLE offermanager.ActivityEvent (
     CONSTRAINT FK_ActivityEvent_Organization FOREIGN KEY (OrganizationId)
         REFERENCES offermanager.Organization(OrganizationId),
     CONSTRAINT FK_ActivityEvent_PerformedBy FOREIGN KEY (PerformedByUserId)
-        REFERENCES offermanager.User(UserId)
+        REFERENCES offermanager.[User](UserId)
 );
 
 CREATE INDEX IX_ActivityEvent_Org_Entity ON offermanager.ActivityEvent (OrganizationId, EntityType, EntityId, CreatedAt DESC);

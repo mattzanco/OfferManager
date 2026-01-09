@@ -12,4 +12,4 @@ CREATE TABLE offermanager.[User] (
         REFERENCES offermanager.Organization(OrganizationId)
 );
 
-CREATE UNIQUE INDEX UX_User_Org_Email ON offermanager.User (OrganizationId, Email);
+CREATE UNIQUE INDEX UX_User_Org_Email ON offermanager.[User] (OrganizationId, Email);

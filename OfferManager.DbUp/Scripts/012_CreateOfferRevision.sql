@@ -26,7 +26,7 @@ CREATE TABLE offermanager.OfferRevision (
     CONSTRAINT FK_OfferRevision_Offer FOREIGN KEY (OfferId)
         REFERENCES offermanager.Offer(OfferId),
     CONSTRAINT FK_OfferRevision_CreatedBy FOREIGN KEY (CreatedByUserId)
-        REFERENCES offermanager.User(UserId),
+        REFERENCES offermanager.[User](UserId),
     CONSTRAINT CK_OfferRevision_Revision CHECK (RevisionNumber >= 1),
     CONSTRAINT CK_OfferRevision_Validity CHECK (
         ValidFromAt IS NULL OR ValidUntilAt IS NULL OR ValidUntilAt >= ValidFromAt

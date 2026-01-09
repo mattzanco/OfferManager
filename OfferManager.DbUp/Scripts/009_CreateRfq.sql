@@ -35,7 +35,7 @@ CREATE TABLE offermanager.Rfq (
     CONSTRAINT FK_Rfq_Destination FOREIGN KEY (DestinationLocationId)
         REFERENCES offermanager.Location(LocationId),
     CONSTRAINT FK_Rfq_CreatedBy FOREIGN KEY (CreatedByUserId)
-        REFERENCES offermanager.User(UserId),
+        REFERENCES offermanager.[User](UserId),
     CONSTRAINT CK_Rfq_Status CHECK (Status IN (N'New', N'Qualified', N'Quoted', N'Won', N'Lost', N'Expired')),
     CONSTRAINT CK_Rfq_Mode CHECK (Mode IN (N'LTL', N'FTL', N'Intermodal', N'Ocean', N'Air')),
     CONSTRAINT CK_Rfqs_Weights CHECK (WeightLbs IS NULL OR WeightLbs >= 0),
