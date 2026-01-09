@@ -10,86 +10,42 @@ namespace OfferManager.Storage.Repositories
 {
     public class OfferRepository : IOfferRepository
     {
-        private readonly string _connectionString;
-
-        public OfferRepository(IConfiguration configuration)
-        {
-            _connectionString = configuration["DbConnectionString"] ?? throw new KeyNotFoundException("DbConnectionString not found");
-        }
+        private readonly List<Offer> _offers = new();
+        private int _nextId = 1;
 
         public async Task<IEnumerable<Offer>> GetAllAsync()
         {
-            var offers = new List<Offer>();
-            using var conn = new SqlConnection(_connectionString);
-            using var cmd = new SqlCommand("SELECT Id, Title, Description, Price FROM Offers", conn);
-            await conn.OpenAsync();
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                offers.Add(new Offer
-                {
-                    Id = reader.GetInt32(0),
-                    Title = reader.GetString(1),
-                    Description = reader.GetString(2),
-                    Price = reader.GetDecimal(3)
-                });
-            }
-            return offers;
+            return await Task.FromResult(_offers);
         }
 
         public async Task<Offer?> GetByIdAsync(int id)
         {
-            using var conn = new SqlConnection(_connectionString);
-            using var cmd = new SqlCommand("SELECT Id, Title, Description, Price FROM Offers WHERE Id = @Id", conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            await conn.OpenAsync();
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-            {
-                return new Offer
-                {
-                    Id = reader.GetInt32(0),
-                    Title = reader.GetString(1),
-                    Description = reader.GetString(2),
-                    Price = reader.GetDecimal(3)
-                };
-            }
-            return null;
+            return await Task.FromResult(_offers.Find(o => o.Id == id));
         }
 
         public async Task<int> AddAsync(Offer offer)
         {
-            using var conn = new SqlConnection(_connectionString);
-            using var cmd = new SqlCommand("INSERT INTO Offers (Title, Description, Price) OUTPUT INSERTED.Id VALUES (@Title, @Description, @Price)", conn);
-            cmd.Parameters.AddWithValue("@Title", offer.Title);
-            cmd.Parameters.AddWithValue("@Description", offer.Description);
-            cmd.Parameters.AddWithValue("@Price", offer.Price);
-            await conn.OpenAsync();
-            var insertedId = (int)await cmd.ExecuteScalarAsync();
-            return insertedId;
+            offer.Id = _nextId++;
+            _offers.Add(offer);
+            return await Task.FromResult(offer.Id);
         }
 
         public async Task<bool> UpdateAsync(Offer offer)
         {
-            using var conn = new SqlConnection(_connectionString);
-            using var cmd = new SqlCommand("UPDATE Offers SET Title = @Title, Description = @Description, Price = @Price WHERE Id = @Id", conn);
-            cmd.Parameters.AddWithValue("@Id", offer.Id);
-            cmd.Parameters.AddWithValue("@Title", offer.Title);
-            cmd.Parameters.AddWithValue("@Description", offer.Description);
-            cmd.Parameters.AddWithValue("@Price", offer.Price);
-            await conn.OpenAsync();
-            var rows = await cmd.ExecuteNonQueryAsync();
-            return rows > 0;
+            var existing = _offers.Find(o => o.Id == offer.Id);
+            if (existing == null) return await Task.FromResult(false);
+            existing.Title = offer.Title;
+            existing.Description = offer.Description;
+            existing.Price = offer.Price;
+            return await Task.FromResult(true);
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            using var conn = new SqlConnection(_connectionString);
-            using var cmd = new SqlCommand("DELETE FROM Offers WHERE Id = @Id", conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-            await conn.OpenAsync();
-            var rows = await cmd.ExecuteNonQueryAsync();
-            return rows > 0;
+            var offer = _offers.Find(o => o.Id == id);
+            if (offer == null) return await Task.FromResult(false);
+            _offers.Remove(offer);
+            return await Task.FromResult(true);
         }
     }
 }
