@@ -68,12 +68,21 @@ resource "azurerm_role_assignment" "current_kv_secrets_officer" {
   depends_on   = [azurerm_key_vault.app]
 }
 
+# SQL Server Firewall Rules
+resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
+  name             = "AllowAzureServices"
+  server_id        = azurerm_mssql_server.main.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
+}
+
 # Store the connection string in Key Vault
 resource "azurerm_key_vault_secret" "db_connection" {
   name         = "DbConnectionString"
   value        = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=sqladminuser;Password=${random_password.sql_admin.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   key_vault_id = azurerm_key_vault.app.id
   depends_on = [
-    azurerm_role_assignment.current_kv_secrets_officer
+    azurerm_role_assignment.current_kv_secrets_officer,
+    azurerm_mssql_firewall_rule.allow_azure_services
   ]
 }
