@@ -234,10 +234,6 @@ stages:
           vmImage: 'ubuntu-latest'
         steps:
           - checkout: self
-        displayName: 'Build, Push Docker Image, and Deploy to AKS'
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
           - task: AzureCLI@2
             displayName: 'Login to Azure'
             inputs:
