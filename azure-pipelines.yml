@@ -231,7 +231,7 @@ stages:
       - job: Deploy
         displayName: 'Build, Push Docker Image, and Deploy to AKS'
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'windows-latest'
         steps:
           - checkout: self
           - task: AzureCLI@2
