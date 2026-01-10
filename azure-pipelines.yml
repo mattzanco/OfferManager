@@ -229,6 +229,7 @@ stages:
     condition: succeeded()
     jobs:
       - job: Deploy
+                  - checkout: self
         displayName: 'Build, Push Docker Image, and Deploy to AKS'
         pool:
           vmImage: 'ubuntu-latest'
