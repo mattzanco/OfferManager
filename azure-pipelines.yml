@@ -288,6 +288,7 @@ stages:
               scriptLocation: 'inlineScript'
               inlineScript: |
                 AKS_NAME=$(az aks list --resource-group $(resource_group_name) --query "[0].name" -o tsv)
+                echo "##vso[task.setvariable variable=AKS_NAME]$AKS_NAME"
                 az aks get-credentials --resource-group $(resource_group_name) --name $AKS_NAME --overwrite-existing
 
           - task: Bash@3
