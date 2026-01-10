@@ -242,15 +242,18 @@ stages:
               inlineScript: |
                 az --version
 
+
           - bash: |
               branch="$(Build.SourceBranchName)"
               if [ "$branch" = "main" ]; then
+                echo "##vso[task.setvariable variable=resource_group_name]offermanager-prd-rg"
                 ACR_NAME="offermanagerprdacr"
               else
+                echo "##vso[task.setvariable variable=resource_group_name]offermanager-dev-rg"
                 ACR_NAME="offermanagerdevacr"
               fi
               echo "##vso[task.setvariable variable=ACR_NAME]$ACR_NAME"
-            displayName: 'Set ACR_NAME variable'
+            displayName: 'Set resource_group_name and ACR_NAME variables'
 
           - task: AzureCLI@2
             displayName: 'Login to ACR'
