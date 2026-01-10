@@ -299,6 +299,11 @@ stages:
               script: |
                 sed -i "s|<ACR_NAME>.azurecr.io/offermanager-api:latest|$(ACR_NAME).azurecr.io/offermanager-api:latest|g" k8s/deployment.yaml
 
+          - script: |
+              echo "Listing files in workspace before deploy:"
+              ls -lR
+            displayName: 'List all files in workspace before deploy'
+
           - task: Kubernetes@1
             displayName: 'Deploy to AKS'
             inputs:
