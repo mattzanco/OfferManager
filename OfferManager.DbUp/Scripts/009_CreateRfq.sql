@@ -38,12 +38,12 @@ CREATE TABLE offermanager.Rfq (
         REFERENCES offermanager.[User](UserId),
     CONSTRAINT CK_Rfq_Status CHECK (Status IN (N'New', N'Qualified', N'Quoted', N'Won', N'Lost', N'Expired')),
     CONSTRAINT CK_Rfq_Mode CHECK (Mode IN (N'LTL', N'FTL', N'Intermodal', N'Ocean', N'Air')),
-    CONSTRAINT CK_Rfqs_Weights CHECK (WeightLbs IS NULL OR WeightLbs >= 0),
-    CONSTRAINT CK_Rfqs_Counts CHECK (
+    CONSTRAINT CK_Rfq_Weights CHECK (WeightLbs IS NULL OR WeightLbs >= 0),
+    CONSTRAINT CK_Rfq_Counts CHECK (
         (PalletCount IS NULL OR PalletCount >= 0) AND
         (PieceCount IS NULL OR PieceCount >= 0)
     )
 );
 
-CREATE INDEX IX_Rfqs_Org_Status_CreatedAt ON offermanager.Rfqs (OrganizationId, Status, CreatedAt DESC);
-CREATE INDEX IX_Rfqs_Org_Customer ON offermanager.Rfqs (OrganizationId, CustomerId);
+CREATE INDEX IX_Rfq_Org_Status_CreatedAt ON offermanager.Rfq (OrganizationId, Status, CreatedAt DESC);
+CREATE INDEX IX_Rfq_Org_Customer ON offermanager.Rfq (OrganizationId, CustomerId);

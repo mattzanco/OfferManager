@@ -25,13 +25,6 @@ stages:
           vmImage: 'windows-latest'
         steps:
           - powershell: |
-              if ($env:BUILD_SOURCEBRANCHNAME -eq "main") {
-                Write-Host "##vso[task.setvariable variable=ASPNETCORE_ENVIRONMENT]Production"
-              } else {
-                Write-Host "##vso[task.setvariable variable=ASPNETCORE_ENVIRONMENT]Development"
-              }
-            displayName: 'Set ASPNETCORE_ENVIRONMENT based on branch'
-          - powershell: |
               $terraformDir = "$(System.DefaultWorkingDirectory)/terraform"
               if (!(Test-Path $terraformDir)) {
                 New-Item -ItemType Directory -Path $terraformDir | Out-Null
@@ -150,13 +143,6 @@ stages:
           - task: UseDotNet@2
             inputs:
               version: '8.0.x'
-          - powershell: |
-              if ($env:BUILD_SOURCEBRANCHNAME -eq "main") {
-                Write-Host "##vso[task.setvariable variable=ASPNETCORE_ENVIRONMENT]Production"
-              } else {
-                Write-Host "##vso[task.setvariable variable=ASPNETCORE_ENVIRONMENT]Development"
-              }
-            displayName: 'Set ASPNETCORE_ENVIRONMENT based on branch (DbUp)'
           - powershell: |
               Write-Host "Build.SourceBranchName: $(Build.SourceBranchName)"
               Write-Host "Build.SourceBranch: $(Build.SourceBranch)"
