@@ -302,7 +302,9 @@ stages:
           - script: |
               echo "Listing files in workspace before deploy:"
               ls -lR
-            displayName: 'List all files in workspace before deploy'
+              echo "\nContents of k8s directory:"
+              ls -l k8s/
+            displayName: 'List all files in workspace before deploy and show k8s directory'
 
           - task: Kubernetes@1
             displayName: 'Deploy to AKS'
