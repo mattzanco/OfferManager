@@ -304,6 +304,11 @@ stages:
               ls -lR
               echo "\nContents of k8s directory:"
               ls -l k8s/
+          - script: |
+              echo "Current branch and commit info:"
+              git rev-parse --abbrev-ref HEAD
+              git rev-parse HEAD
+            displayName: 'Show current branch and commit'
             displayName: 'List all files in workspace before deploy and show k8s directory'
 
           - task: Kubernetes@1
