@@ -86,3 +86,45 @@ resource "azurerm_key_vault_secret" "db_connection" {
     azurerm_mssql_firewall_rule.allow_azure_services
   ]
 }
+
+# Azure Container Registry
+resource "azurerm_container_registry" "main" {
+  name                = substr(replace(lower("${var.app_name}${var.env}acr"), "_", ""), 0, 50)
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  sku                 = "Basic"
+  admin_enabled       = false
+}
+
+# Azure Kubernetes Service (AKS)
+resource "azurerm_kubernetes_cluster" "main" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-aks"), "_", "-"), 0, 24)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = substr(replace(lower("${var.app_name}-${var.env}-aks"), "_", "-"), 0, 24)
+
+  default_node_pool {
+    name       = "default"
+    node_count = 2
+    vm_size    = "Standard_DS2_v2"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  network_profile {
+    network_plugin = "azure"
+    load_balancer_sku = "standard"
+  }
+
+  depends_on = [azurerm_resource_group.main, azurerm_key_vault.app, azurerm_mssql_server.main, azurerm_mssql_database.main, azurerm_container_registry.main]
+}
+
+# Grant AKS access to ACR
+resource "azurerm_role_assignment" "aks_acr_pull" {
+  principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
+  role_definition_name = "AcrPull"
+  scope                = azurerm_container_registry.main.id
+  depends_on           = [azurerm_kubernetes_cluster.main, azurerm_container_registry.main]
+}

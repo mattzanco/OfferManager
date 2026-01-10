@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: offermanager-webapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: offermanager-webapi
+  template:
+    metadata:
+      labels:
+        app: offermanager-webapi
+    spec:
+      containers:
+      - name: offermanager-webapi
+        image: <ACR_NAME>.azurecr.io/offermanager-api:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        # Add other environment variables as needed
+        # - name: ConnectionStrings__DefaultConnection
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: offermanager-secrets
+        #       key: DefaultConnection
