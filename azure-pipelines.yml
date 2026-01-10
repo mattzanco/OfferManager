@@ -234,6 +234,10 @@ stages:
           vmImage: 'ubuntu-latest'
         steps:
           - checkout: self
+          - script: |
+              echo "Contents of k8s directory immediately after checkout:"
+              ls -l k8s/
+            displayName: 'List k8s directory after checkout'
           - task: AzureCLI@2
             displayName: 'Login to Azure'
             inputs:
