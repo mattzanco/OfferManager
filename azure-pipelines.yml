@@ -303,19 +303,6 @@ stages:
               script: |
                 sed -i "s|<ACR_NAME>.azurecr.io/offermanager-api:latest|$(ACR_NAME).azurecr.io/offermanager-api:latest|g" k8s/deployment.yaml
 
-          - script: |
-              echo "Listing files in workspace before deploy:"
-              ls -lR
-              echo "\nContents of k8s directory:"
-              ls -l k8s/
-            displayName: 'List all files in workspace before deploy and show k8s directory'
-
-          - script: |
-              echo "Current branch and commit info:"
-              git rev-parse --abbrev-ref HEAD
-              git rev-parse HEAD
-            displayName: 'Show current branch and commit'
-
           - task: Kubernetes@1
             displayName: 'Deploy to AKS'
             inputs:
