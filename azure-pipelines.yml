@@ -306,13 +306,28 @@ stages:
                 az aks get-credentials --resource-group $(resource_group_name) --name $AKS_NAME --overwrite-existing
 
 
-          - task: Bash@3
-            displayName: 'Update image and KEY_VAULT_NAME in deployment.yaml'
+          - bash: |
+              IMAGE_TAG=$(Build.BuildId)
+              echo "##vso[task.setvariable variable=IMAGE_TAG]$IMAGE_TAG"
+              sed -i "s|<ACR_NAME>.azurecr.io/offermanager-api:latest|$(ACR_NAME).azurecr.io/offermanager-api:$IMAGE_TAG|g" k8s/deployment.yaml
+              sed -i "s|value: \"$(KEY_VAULT_NAME)\"|value: \"$KEY_VAULT_NAME\"|g" k8s/deployment.yaml
+            displayName: 'Update image tag and KEY_VAULT_NAME in deployment.yaml'
+
+          - task: Docker@2
+            displayName: 'Build Docker Image with unique tag'
             inputs:
-              targetType: 'inline'
-              script: |
-                sed -i "s|<ACR_NAME>.azurecr.io/offermanager-api:latest|$(ACR_NAME).azurecr.io/offermanager-api:latest|g" k8s/deployment.yaml
-                sed -i "s|value: \"$(KEY_VAULT_NAME)\"|value: \"$KEY_VAULT_NAME\"|g" k8s/deployment.yaml
+              command: build
+              Dockerfile: OfferManager.WebApi/Dockerfile
+              tags: $(IMAGE_TAG)
+              buildContext: .
+              repository: $(ACR_NAME).azurecr.io/offermanager-api
+
+          - task: Docker@2
+            displayName: 'Push Docker Image with unique tag to ACR'
+            inputs:
+              command: push
+              repository: $(ACR_NAME).azurecr.io/offermanager-api
+              tags: $(IMAGE_TAG)
 
           - task: Kubernetes@1
             displayName: 'Deploy to AKS'
