@@ -136,3 +136,11 @@ resource "azurerm_role_assignment" "aks_keyvault_secrets_user" {
   principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
   depends_on           = [azurerm_kubernetes_cluster.main, azurerm_key_vault.app]
 }
+
+# Grant AKS node pool (kubelet identity) access to Key Vault secrets
+resource "azurerm_role_assignment" "aks_kubelet_keyvault_secrets_user" {
+  scope                = azurerm_key_vault.app.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
+  depends_on           = [azurerm_kubernetes_cluster.main, azurerm_key_vault.app]
+}
