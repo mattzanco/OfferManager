@@ -305,12 +305,14 @@ stages:
                 echo "##vso[task.setvariable variable=AKS_NAME]$AKS_NAME"
                 az aks get-credentials --resource-group $(resource_group_name) --name $AKS_NAME --overwrite-existing
 
+
           - task: Bash@3
-            displayName: 'Update image in deployment.yaml'
+            displayName: 'Update image and KEY_VAULT_NAME in deployment.yaml'
             inputs:
               targetType: 'inline'
               script: |
                 sed -i "s|<ACR_NAME>.azurecr.io/offermanager-api:latest|$(ACR_NAME).azurecr.io/offermanager-api:latest|g" k8s/deployment.yaml
+                sed -i "s|value: \"$(KEY_VAULT_NAME)\"|value: \"$KEY_VAULT_NAME\"|g" k8s/deployment.yaml
 
           - task: Kubernetes@1
             displayName: 'Deploy to AKS'
