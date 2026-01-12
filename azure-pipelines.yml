@@ -238,6 +238,15 @@ stages:
               echo "Contents of k8s directory immediately after checkout:"
               ls -l k8s/
             displayName: 'List k8s directory after checkout'
+
+          - bash: |
+              branch="$(Build.SourceBranchName)"
+              if [ "$branch" = "main" ]; then
+                echo "##vso[task.setvariable variable=KEY_VAULT_NAME]offermanager-prd-kv"
+              else
+                echo "##vso[task.setvariable variable=KEY_VAULT_NAME]offermanager-dev-kv"
+              fi
+            displayName: 'Set KEY_VAULT_NAME for deployment'
           - task: AzureCLI@2
             displayName: 'Login to Azure'
             inputs:
@@ -315,3 +324,5 @@ stages:
               useConfigurationFile: true
               configuration: 'k8s'
               secretType: 'None'
+            env:
+              KEY_VAULT_NAME: $(KEY_VAULT_NAME)

@@ -3,10 +3,9 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Determine Key Vault name based on environment
-string keyVaultName = builder.Environment.IsDevelopment()
-    ? "offermanager-dev-kv"
-    : "offermanager-prd-kv";
+
+// Determine Key Vault name from environment variable, fallback to default
+string keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME") ?? "offermanager-dev-kv";
 
 string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
 
