@@ -128,3 +128,11 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   scope                = azurerm_container_registry.main.id
   depends_on           = [azurerm_kubernetes_cluster.main, azurerm_container_registry.main]
 }
+
+# Grant AKS managed identity access to Key Vault secrets
+resource "azurerm_role_assignment" "aks_keyvault_secrets_user" {
+  scope                = azurerm_key_vault.app.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
+  depends_on           = [azurerm_kubernetes_cluster.main, azurerm_key_vault.app]
+}
