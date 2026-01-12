@@ -20,6 +20,8 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
+        - name: KEY_VAULT_NAME
+          value: "$(KEY_VAULT_NAME)" # Value will be injected by the pipeline
         # Add other environment variables as needed
         # - name: ConnectionStrings__DefaultConnection
         #   valueFrom:
