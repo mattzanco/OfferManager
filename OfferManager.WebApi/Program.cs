@@ -24,7 +24,7 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.ApplicationInsights(
-        ctx.Configuration["ApplicationInsights:InstrumentationKey"],
+        ctx.Configuration["ApplicationInsights:ConnectionString"],
         TelemetryConverter.Traces,
         restrictedToMinimumLevel: LogEventLevel.Information)
 );
