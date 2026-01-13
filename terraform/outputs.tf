@@ -6,7 +6,8 @@ output "app_insights_instrumentation_key" {
 }
 
 output "app_insights_connection_string" {
-	value = azurerm_application_insights.main.connection_string
+	value       = azurerm_application_insights.main.connection_string
 	description = "Connection string for Application Insights"
+	sensitive   = true
 }
 # Define your Terraform outputs here
