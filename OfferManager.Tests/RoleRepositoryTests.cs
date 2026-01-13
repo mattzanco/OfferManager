@@ -11,7 +11,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task AddAndGetRole_Works()
         {
-            var repo = new RoleRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<RoleRepository>>();
+            var repo = new RoleRepository(mockLogger.Object);
             var role = new Role { RoleId = 1, Name = "Admin" };
             var id = await repo.AddAsync(role);
             var result = await repo.GetByIdAsync(id);
@@ -21,7 +22,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task GetAll_ReturnsEmptyList()
         {
-            var repo = new RoleRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<RoleRepository>>();
+            var repo = new RoleRepository(mockLogger.Object);
             var roles = await repo.GetAllAsync();
             Assert.Empty(roles);
         }
@@ -29,7 +31,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Update_ReturnsFalse()
         {
-            var repo = new RoleRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<RoleRepository>>();
+            var repo = new RoleRepository(mockLogger.Object);
             var role = new Role { RoleId = 1, Name = "Admin" };
             var updated = await repo.UpdateAsync(role);
             Assert.False(updated);
@@ -38,7 +41,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Delete_ReturnsFalse()
         {
-            var repo = new RoleRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<RoleRepository>>();
+            var repo = new RoleRepository(mockLogger.Object);
             var deleted = await repo.DeleteAsync(1);
             Assert.False(deleted);
         }

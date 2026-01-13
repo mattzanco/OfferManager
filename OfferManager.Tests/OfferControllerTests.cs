@@ -17,7 +17,8 @@ namespace OfferManager.Tests
         public OfferControllerTests()
         {
             _mockRepo = new Mock<IOfferRepository>();
-            _controller = new TestOfferController(_mockRepo.Object);
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<TestOfferController>>();
+            _controller = new TestOfferController(_mockRepo.Object, mockLogger.Object);
         }
 
         [Fact]
@@ -101,10 +102,15 @@ namespace OfferManager.Tests
         }
 
         // Minimal test controller for unit tests
-        private class TestOfferController : ControllerBase
+        public class TestOfferController : ControllerBase
         {
             private readonly IOfferRepository _repository;
-            public TestOfferController(IOfferRepository repository) => _repository = repository;
+            private readonly Microsoft.Extensions.Logging.ILogger<TestOfferController> _logger;
+            public TestOfferController(IOfferRepository repository, Microsoft.Extensions.Logging.ILogger<TestOfferController> logger)
+            {
+                _repository = repository;
+                _logger = logger;
+            }
 
             public async Task<IActionResult> GetAll() => Ok(await _repository.GetAllAsync());
             public async Task<IActionResult> GetById(int id)

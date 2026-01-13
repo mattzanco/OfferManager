@@ -16,7 +16,8 @@ namespace OfferManager.Tests
         {
             var mockRepo = new Mock<IUserRepository>();
             mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<User> { new User { Id = 1, Username = "test", Email = "test@example.com" } });
-            var controller = new UserController(mockRepo.Object);
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<OfferManager.WebApi.Controllers.UserController>>();
+            var controller = new UserController(mockRepo.Object, mockLogger.Object);
             var result = await controller.GetAll();
             Assert.IsType<OkObjectResult>(result);
         }

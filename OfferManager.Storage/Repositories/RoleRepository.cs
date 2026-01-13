@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
 using System.Collections.Generic;
@@ -29,13 +30,13 @@ namespace OfferManager.Storage.Repositories
 
         public Task<int> AddAsync(Role role)
         {
-            _logger.LogInformation("Added role: {Id}", role.Id);
+            _logger.LogInformation("Added role: {RoleId}", role.RoleId);
             return Task.FromResult(0);
         }
 
         public Task<bool> UpdateAsync(Role role)
         {
-            _logger.LogWarning("Update failed, role not found: {Id}", role.Id);
+            _logger.LogWarning("Update failed, role not found: {RoleId}", role.RoleId);
             return Task.FromResult(false);
         }
 

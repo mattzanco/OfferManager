@@ -16,7 +16,8 @@ namespace OfferManager.Tests
         public LocationControllerTests()
         {
             _mockRepo = new Mock<ILocationRepository>();
-            _controller = new LocationController(_mockRepo.Object);
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<OfferManager.WebApi.Controllers.LocationController>>();
+            _controller = new LocationController(_mockRepo.Object, mockLogger.Object);
         }
 
         [Fact]

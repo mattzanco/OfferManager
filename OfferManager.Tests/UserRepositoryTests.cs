@@ -11,7 +11,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task AddAndGetUser_Works()
         {
-            var repo = new UserRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<UserRepository>>();
+            var repo = new UserRepository(mockLogger.Object);
             var user = new User { Id = 1, Username = "test", Email = "test@example.com" };
             await repo.AddAsync(user);
             var result = await repo.GetByIdAsync(1);

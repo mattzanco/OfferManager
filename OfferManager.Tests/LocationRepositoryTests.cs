@@ -12,7 +12,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task AddAndGetLocation_Works()
         {
-            var repo = new LocationRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<LocationRepository>>();
+            var repo = new LocationRepository(mockLogger.Object);
             var location = new Location { LocationId = Guid.NewGuid(), Name = "HQ" };
             var id = await repo.AddAsync(location);
             var result = await repo.GetByIdAsync(id);
@@ -22,7 +23,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task GetAll_ReturnsEmptyList()
         {
-            var repo = new LocationRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<LocationRepository>>();
+            var repo = new LocationRepository(mockLogger.Object);
             var locations = await repo.GetAllAsync();
             Assert.Empty(locations);
         }
@@ -30,7 +32,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Update_ReturnsFalse()
         {
-            var repo = new LocationRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<LocationRepository>>();
+            var repo = new LocationRepository(mockLogger.Object);
             var location = new Location { LocationId = Guid.NewGuid(), Name = "HQ" };
             var updated = await repo.UpdateAsync(location);
             Assert.False(updated);
@@ -39,7 +42,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Delete_ReturnsFalse()
         {
-            var repo = new LocationRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<LocationRepository>>();
+            var repo = new LocationRepository(mockLogger.Object);
             var deleted = await repo.DeleteAsync(Guid.NewGuid());
             Assert.False(deleted);
         }

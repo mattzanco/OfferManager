@@ -11,7 +11,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task AddAndGetCustomer_Works()
         {
-            var repo = new CustomerRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<CustomerRepository>>();
+            var repo = new CustomerRepository(mockLogger.Object);
             var customer = new Customer { CustomerId = Guid.NewGuid(), Name = "Acme" };
             await repo.AddAsync(customer);
             var result = await repo.GetByIdAsync(customer.CustomerId);

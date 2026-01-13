@@ -17,7 +17,8 @@ namespace OfferManager.Tests
         public DocumentControllerTests()
         {
             _mockRepo = new Mock<IDocumentRepository>();
-            _controller = new TestDocumentController(_mockRepo.Object);
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<TestDocumentController>>();
+            _controller = new TestDocumentController(_mockRepo.Object, mockLogger.Object);
         }
 
         [Fact]
@@ -108,10 +109,15 @@ namespace OfferManager.Tests
         }
 
         // Minimal test controller for unit tests
-        private class TestDocumentController : ControllerBase
+        public class TestDocumentController : ControllerBase
         {
             private readonly IDocumentRepository _repository;
-            public TestDocumentController(IDocumentRepository repository) => _repository = repository;
+            private readonly Microsoft.Extensions.Logging.ILogger<TestDocumentController> _logger;
+            public TestDocumentController(IDocumentRepository repository, Microsoft.Extensions.Logging.ILogger<TestDocumentController> logger)
+            {
+                _repository = repository;
+                _logger = logger;
+            }
 
             public async Task<IActionResult> GetAll() => Ok(await _repository.GetAllAsync());
             public async Task<IActionResult> GetById(Guid id)

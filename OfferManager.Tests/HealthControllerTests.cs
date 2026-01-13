@@ -15,7 +15,8 @@ namespace OfferManager.Tests
         [Fact]
         public void Ping_ReturnsOkTrue()
         {
-            var controller = new HealthController();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<OfferManager.WebApi.Controllers.HealthController>>();
+            var controller = new HealthController(mockLogger.Object);
             var result = controller.Ping();
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.True((bool)okResult.Value!);

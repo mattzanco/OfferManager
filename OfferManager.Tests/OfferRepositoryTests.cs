@@ -10,7 +10,11 @@ namespace OfferManager.Tests
 {
     public class OfferRepositoryTests
     {
-        private OfferRepository CreateRepository() => new OfferRepository();
+        private OfferRepository CreateRepository()
+        {
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<OfferManager.Storage.Repositories.OfferRepository>>();
+            return new OfferManager.Storage.Repositories.OfferRepository(mockLogger.Object);
+        }
 
         [Fact]
         public async Task GetAllAsync_ReturnsList()

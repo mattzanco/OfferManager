@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
 using System.Collections.Generic;

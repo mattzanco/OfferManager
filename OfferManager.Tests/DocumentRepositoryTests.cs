@@ -12,7 +12,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task AddAndGetDocument_Works()
         {
-            var repo = new DocumentRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<DocumentRepository>>();
+            var repo = new DocumentRepository(mockLogger.Object);
             var document = new Document { DocumentId = Guid.NewGuid(), FileName = "file.txt" };
             var id = await repo.AddAsync(document);
             var result = await repo.GetByIdAsync(id);
@@ -22,7 +23,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task GetAll_ReturnsEmptyList()
         {
-            var repo = new DocumentRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<DocumentRepository>>();
+            var repo = new DocumentRepository(mockLogger.Object);
             var documents = await repo.GetAllAsync();
             Assert.Empty(documents);
         }
@@ -30,7 +32,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Update_ReturnsFalse()
         {
-            var repo = new DocumentRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<DocumentRepository>>();
+            var repo = new DocumentRepository(mockLogger.Object);
             var document = new Document { DocumentId = Guid.NewGuid(), FileName = "file.txt" };
             var updated = await repo.UpdateAsync(document);
             Assert.False(updated);
@@ -39,7 +42,8 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Delete_ReturnsFalse()
         {
-            var repo = new DocumentRepository();
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<DocumentRepository>>();
+            var repo = new DocumentRepository(mockLogger.Object);
             var deleted = await repo.DeleteAsync(Guid.NewGuid());
             Assert.False(deleted);
         }
