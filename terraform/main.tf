@@ -49,7 +49,7 @@ resource "azurerm_key_vault" "app" {
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
   access_policy               = []
-  enable_rbac_authorization   = true
+  rbac_authorization_enabled   = true
 }
 
 # SQL admin credentials (for demo, use Key Vault or secure method in production)
