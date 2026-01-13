@@ -1,6 +1,6 @@
 # Store the Application Insights Connection String in Key Vault
 resource "azurerm_key_vault_secret" "appinsights_connectionstring" {
-  name         = "AppInsightsConnectionString"
+  name         = "ApplicationInsights--ConnectionString"
   value        = azurerm_application_insights.main.connection_string
   key_vault_id = azurerm_key_vault.app.id
   depends_on   = [azurerm_application_insights.main, azurerm_key_vault.app]
