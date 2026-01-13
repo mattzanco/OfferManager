@@ -9,41 +9,77 @@ namespace OfferManager.WebApi.Controllers
     public class LoadController : ControllerBase
     {
         private readonly ILoadRepository _repository;
-        public LoadController(ILoadRepository repository)
+        private readonly ILogger<LoadController> _logger;
+
+        public LoadController(ILoadRepository repository, ILogger<LoadController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _repository.GetAllAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            _logger.LogDebug("Getting all loads");
+            var loads = await _repository.GetAllAsync();
+            _logger.LogInformation("Returned {Count} loads", loads?.Count() ?? 0);
+            return Ok(loads);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
+            _logger.LogDebug("Getting load by id: {Id}", id);
             var load = await _repository.GetByIdAsync(id);
-            return load is null ? NotFound() : Ok(load);
+            if (load is null)
+            {
+                _logger.LogWarning("Load not found: {Id}", id);
+                return NotFound();
+            }
+            _logger.LogInformation("Returned load: {Id}", id);
+            return Ok(load);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Load load)
         {
+            _logger.LogDebug("Creating new load");
             var id = await _repository.AddAsync(load);
+            _logger.LogInformation("Created load with id: {Id}", id);
             return CreatedAtAction(nameof(GetById), new { id }, load);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, Load load)
         {
-            if (id != load.LoadId) return BadRequest();
+            if (id != load.LoadId)
+            {
+                _logger.LogWarning("Update failed: route id {RouteId} does not match load id {LoadId}", id, load.LoadId);
+                return BadRequest();
+            }
+            _logger.LogDebug("Updating load: {Id}", id);
             var updated = await _repository.UpdateAsync(load);
-            return updated ? NoContent() : NotFound();
+            if (updated)
+            {
+                _logger.LogInformation("Updated load: {Id}", id);
+                return NoContent();
+            }
+            _logger.LogWarning("Load not found for update: {Id}", id);
+            return NotFound();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
+            _logger.LogDebug("Deleting load: {Id}", id);
             var deleted = await _repository.DeleteAsync(id);
-            return deleted ? NoContent() : NotFound();
+            if (deleted)
+            {
+                _logger.LogInformation("Deleted load: {Id}", id);
+                return NoContent();
+            }
+            _logger.LogWarning("Load not found for delete: {Id}", id);
+            return NotFound();
         }
     }
 }

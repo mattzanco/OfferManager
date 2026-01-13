@@ -1,3 +1,19 @@
+# Store the Application Insights Instrumentation Key in Key Vault
+resource "azurerm_key_vault_secret" "appinsights_instrumentationkey" {
+  name         = "AppInsightsInstrumentationKey"
+  value        = azurerm_application_insights.main.instrumentation_key
+  key_vault_id = azurerm_key_vault.app.id
+  depends_on   = [azurerm_application_insights.main, azurerm_key_vault.app]
+}
+# Application Insights
+resource "azurerm_application_insights" "main" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-appi"), "_", "-"), 0, 24)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  application_type    = "web"
+  retention_in_days   = 30
+  # workspace_id can be added for Log Analytics integration
+}
 terraform {
   backend "azurerm" {
     resource_group_name  = "HireMattResources"
