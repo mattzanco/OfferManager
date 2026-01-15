@@ -1,76 +1,65 @@
-using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 
 namespace OfferManager.Storage.Repositories
 {
     public class OfferRepository : IOfferRepository
     {
-        private readonly List<Offer> _offers = new();
-        private int _nextId = 1;
-        private readonly Microsoft.Extensions.Logging.ILogger<OfferRepository> _logger;
+        private readonly string _connectionString;
 
-        public OfferRepository(Microsoft.Extensions.Logging.ILogger<OfferRepository> logger)
+        public OfferRepository(IConfiguration configuration)
         {
-            _logger = logger;
+            _connectionString = configuration["DbConnectionString"];
         }
 
         public async Task<IEnumerable<Offer>> GetAllAsync()
         {
-            _logger.LogDebug("Fetching all offers");
-            return await Task.FromResult(_offers);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Offer";
+            return await connection.QueryAsync<Offer>(sql);
         }
 
         public async Task<Offer?> GetByIdAsync(int id)
         {
-            _logger.LogDebug("Fetching offer by id: {Id}", id);
-            var offer = _offers.Find(o => o.Id == id);
-            if (offer == null)
-                _logger.LogWarning("Offer not found: {Id}", id);
-            else
-                _logger.LogInformation("Offer found: {Id}", id);
-            return await Task.FromResult(offer);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Offer WHERE OfferId = @Id";
+            return await connection.QuerySingleOrDefaultAsync<Offer>(sql, new { Id = id });
         }
 
         public async Task<int> AddAsync(Offer offer)
         {
-            offer.Id = _nextId++;
-            _offers.Add(offer);
-            _logger.LogInformation("Added offer: {Id}", offer.Id);
-            return await Task.FromResult(offer.Id);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"INSERT INTO offermanager.Offer (OrganizationId, RfqId, CustomerId, Status, CurrentRevisionId, CreatedByUserId, CreatedAt, UpdatedAt)
+                                 VALUES (@OrganizationId, @RfqId, @CustomerId, @Status, @CurrentRevisionId, @CreatedByUserId, @CreatedAt, @UpdatedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
+            if (offer.CreatedAt == default)
+                offer.CreatedAt = DateTime.UtcNow;
+            if (offer.UpdatedAt == default)
+                offer.UpdatedAt = DateTime.UtcNow;
+            var id = await connection.ExecuteScalarAsync<int>(sql, offer);
+            return id;
         }
 
         public async Task<bool> UpdateAsync(Offer offer)
         {
-            var existing = _offers.Find(o => o.Id == offer.Id);
-            if (existing == null)
-            {
-                _logger.LogWarning("Update failed, offer not found: {Id}", offer.Id);
-                return await Task.FromResult(false);
-            }
-            existing.Title = offer.Title;
-            existing.Description = offer.Description;
-            existing.Price = offer.Price;
-            _logger.LogInformation("Updated offer: {Id}", offer.Id);
-            return await Task.FromResult(true);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"UPDATE offermanager.Offer SET OrganizationId = @OrganizationId, RfqId = @RfqId, CustomerId = @CustomerId, Status = @Status, CurrentRevisionId = @CurrentRevisionId, CreatedByUserId = @CreatedByUserId, UpdatedAt = @UpdatedAt WHERE OfferId = @Id";
+            offer.UpdatedAt = DateTime.UtcNow;
+            var rows = await connection.ExecuteAsync(sql, offer);
+            return rows > 0;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var offer = _offers.Find(o => o.Id == id);
-            if (offer == null)
-            {
-                _logger.LogWarning("Delete failed, offer not found: {Id}", id);
-                return await Task.FromResult(false);
-            }
-            _offers.Remove(offer);
-            _logger.LogInformation("Deleted offer: {Id}", id);
-            return await Task.FromResult(true);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "DELETE FROM offermanager.Offer WHERE OfferId = @Id";
+            var rows = await connection.ExecuteAsync(sql, new { Id = id });
+            return rows > 0;
         }
     }
 }

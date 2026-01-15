@@ -6,10 +6,13 @@ public class Offer
     public required string Title { get; set; }
     public string? Description { get; set; }
     public decimal Price { get; set; }
-    public DateTime CreateDateUtc { get; set; }
-    public DateTime UpdateDateUtc { get; set; }
-    public DateTime StartDateUtc { get; set; }
-    public DateTime ExpirationDateUtc { get; set; }
-    public int CreateByUserId { get; set; }
-    public int UpdateByUserId { get; set; }
+    // Add properties to match repository and DB schema
+    public Guid OrganizationId { get; set; }
+    public Guid? RfqId { get; set; }
+    public Guid CustomerId { get; set; }
+    public string Status { get; set; } = "Draft";
+    public Guid? CurrentRevisionId { get; set; }
+    public Guid CreatedByUserId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

@@ -1,49 +1,72 @@
+using Microsoft.Data.SqlClient;
+using Dapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace OfferManager.Storage.Repositories
 {
     public class LaneRepository : ILaneRepository
     {
+        private readonly string _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<LaneRepository> _logger;
 
-        public LaneRepository(Microsoft.Extensions.Logging.ILogger<LaneRepository> logger)
+        public LaneRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<LaneRepository> logger)
         {
+            _connectionString = configuration["DbConnectionString"];
             _logger = logger;
         }
 
-        public Task<IEnumerable<Lane>> GetAllAsync()
+        public async Task<IEnumerable<Lane>> GetAllAsync()
         {
             _logger.LogDebug("Fetching all lanes");
-            return Task.FromResult<IEnumerable<Lane>>(new List<Lane>());
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Lane";
+            return await connection.QueryAsync<Lane>(sql);
         }
 
-        public Task<Lane?> GetByIdAsync(System.Guid id)
+        public async Task<Lane?> GetByIdAsync(Guid id)
         {
             _logger.LogDebug("Fetching lane by id: {Id}", id);
-            _logger.LogWarning("Lane not found: {Id}", id);
-            return Task.FromResult<Lane?>(null);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Lane WHERE LaneId = @Id";
+            return await connection.QuerySingleOrDefaultAsync<Lane>(sql, new { Id = id });
         }
 
-        public Task<System.Guid> AddAsync(Lane lane)
+        public async Task<Guid> AddAsync(Lane lane)
         {
             _logger.LogInformation("Added lane: {Id}", lane.LaneId);
-            return Task.FromResult(System.Guid.Empty);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"INSERT INTO offermanager.Lane (LaneId, OrganizationId, OriginLocationId, DestinationLocationId, LaneCode, DistanceMiles, CreatedAt)
+                                 VALUES (@LaneId, @OrganizationId, @OriginLocationId, @DestinationLocationId, @LaneCode, @DistanceMiles, @CreatedAt)";
+            if (lane.LaneId == Guid.Empty)
+                lane.LaneId = Guid.NewGuid();
+            if (lane.CreatedAt == default)
+                lane.CreatedAt = DateTime.UtcNow;
+            await connection.ExecuteAsync(sql, lane);
+            return lane.LaneId;
         }
 
-        public Task<bool> UpdateAsync(Lane lane)
+        public async Task<bool> UpdateAsync(Lane lane)
         {
             _logger.LogWarning("Update failed, lane not found: {Id}", lane.LaneId);
-            return Task.FromResult(false);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"UPDATE offermanager.Lane SET OrganizationId = @OrganizationId, OriginLocationId = @OriginLocationId, DestinationLocationId = @DestinationLocationId, LaneCode = @LaneCode, DistanceMiles = @DistanceMiles WHERE LaneId = @LaneId";
+            var rows = await connection.ExecuteAsync(sql, lane);
+            return rows > 0;
         }
 
-        public Task<bool> DeleteAsync(System.Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             _logger.LogWarning("Delete failed, lane not found: {Id}", id);
-            return Task.FromResult(false);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "DELETE FROM offermanager.Lane WHERE LaneId = @Id";
+            var rows = await connection.ExecuteAsync(sql, new { Id = id });
+            return rows > 0;
         }
     }
 }

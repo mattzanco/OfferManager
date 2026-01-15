@@ -1,49 +1,72 @@
+using Microsoft.Data.SqlClient;
+using Dapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace OfferManager.Storage.Repositories
 {
     public class DocumentRepository : IDocumentRepository
     {
+        private readonly string _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<DocumentRepository> _logger;
 
-        public DocumentRepository(Microsoft.Extensions.Logging.ILogger<DocumentRepository> logger)
+        public DocumentRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<DocumentRepository> logger)
         {
+            _connectionString = configuration["DbConnectionString"];
             _logger = logger;
         }
 
-        public Task<IEnumerable<Document>> GetAllAsync()
+        public async Task<IEnumerable<Document>> GetAllAsync()
         {
             _logger.LogDebug("Fetching all documents");
-            return Task.FromResult<IEnumerable<Document>>(new List<Document>());
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Document";
+            return await connection.QueryAsync<Document>(sql);
         }
 
-        public Task<Document?> GetByIdAsync(System.Guid id)
+        public async Task<Document?> GetByIdAsync(Guid id)
         {
             _logger.LogDebug("Fetching document by id: {Id}", id);
-            _logger.LogWarning("Document not found: {Id}", id);
-            return Task.FromResult<Document?>(null);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Document WHERE DocumentId = @Id";
+            return await connection.QuerySingleOrDefaultAsync<Document>(sql, new { Id = id });
         }
 
-        public Task<System.Guid> AddAsync(Document document)
+        public async Task<Guid> AddAsync(Document document)
         {
             _logger.LogInformation("Added document: {Id}", document.DocumentId);
-            return Task.FromResult(System.Guid.Empty);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"INSERT INTO offermanager.Document (DocumentId, OrganizationId, EntityType, EntityId, FileName, ContentType, StorageProvider, StorageKey, UploadedByUserId, UploadedAt)
+                                 VALUES (@DocumentId, @OrganizationId, @EntityType, @EntityId, @FileName, @ContentType, @StorageProvider, @StorageKey, @UploadedByUserId, @UploadedAt)";
+            if (document.DocumentId == Guid.Empty)
+                document.DocumentId = Guid.NewGuid();
+            if (document.UploadedAt == default)
+                document.UploadedAt = DateTime.UtcNow;
+            await connection.ExecuteAsync(sql, document);
+            return document.DocumentId;
         }
 
-        public Task<bool> UpdateAsync(Document document)
+        public async Task<bool> UpdateAsync(Document document)
         {
             _logger.LogWarning("Update failed, document not found: {Id}", document.DocumentId);
-            return Task.FromResult(false);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"UPDATE offermanager.Document SET OrganizationId = @OrganizationId, EntityType = @EntityType, EntityId = @EntityId, FileName = @FileName, ContentType = @ContentType, StorageProvider = @StorageProvider, StorageKey = @StorageKey, UploadedByUserId = @UploadedByUserId WHERE DocumentId = @DocumentId";
+            var rows = await connection.ExecuteAsync(sql, document);
+            return rows > 0;
         }
 
-        public Task<bool> DeleteAsync(System.Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             _logger.LogWarning("Delete failed, document not found: {Id}", id);
-            return Task.FromResult(false);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "DELETE FROM offermanager.Document WHERE DocumentId = @Id";
+            var rows = await connection.ExecuteAsync(sql, new { Id = id });
+            return rows > 0;
         }
     }
 }

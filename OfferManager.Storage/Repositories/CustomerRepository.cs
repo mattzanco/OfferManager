@@ -1,69 +1,83 @@
+using Microsoft.Data.SqlClient;
+using Dapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace OfferManager.Storage.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
-        private readonly List<Customer> _customers = new();
+        private readonly string _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<CustomerRepository> _logger;
 
-        public CustomerRepository(Microsoft.Extensions.Logging.ILogger<CustomerRepository> logger)
+        public CustomerRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<CustomerRepository> logger)
         {
+            _connectionString = configuration["DbConnectionString"];
             _logger = logger;
         }
 
-        public Task<IEnumerable<Customer>> GetAllAsync()
+        public async Task<IEnumerable<Customer>> GetAllAsync()
         {
             _logger.LogDebug("Fetching all customers");
-            return Task.FromResult<IEnumerable<Customer>>(_customers);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Customer";
+            return await connection.QueryAsync<Customer>(sql);
         }
 
-        public Task<Customer?> GetByIdAsync(System.Guid id)
+        public async Task<Customer?> GetByIdAsync(Guid id)
         {
             _logger.LogDebug("Fetching customer by id: {Id}", id);
-            var customer = _customers.Find(c => c.CustomerId == id);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.Customer WHERE CustomerId = @Id";
+            var customer = await connection.QuerySingleOrDefaultAsync<Customer>(sql, new { Id = id });
             if (customer == null)
                 _logger.LogWarning("Customer not found: {Id}", id);
             else
                 _logger.LogInformation("Customer found: {Id}", id);
-            return Task.FromResult(customer);
+            return customer;
         }
 
-        public Task<System.Guid> AddAsync(Customer customer)
+        public async Task<Guid> AddAsync(Customer customer)
         {
-            _customers.Add(customer);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"INSERT INTO offermanager.Customer (CustomerId, OrganizationId, Name, AccountCode, BillingTerms, Status, CreatedAt)
+                                 VALUES (@CustomerId, @OrganizationId, @Name, @AccountCode, @BillingTerms, @Status, @CreatedAt)";
+            if (customer.CustomerId == Guid.Empty)
+                customer.CustomerId = Guid.NewGuid();
+            if (customer.CreatedAt == default)
+                customer.CreatedAt = DateTime.UtcNow;
+            await connection.ExecuteAsync(sql, customer);
             _logger.LogInformation("Added customer: {Id}", customer.CustomerId);
-            return Task.FromResult(customer.CustomerId);
+            return customer.CustomerId;
         }
 
-        public Task<bool> UpdateAsync(Customer customer)
+        public async Task<bool> UpdateAsync(Customer customer)
         {
-            var existing = _customers.Find(c => c.CustomerId == customer.CustomerId);
-            if (existing == null)
-            {
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"UPDATE offermanager.Customer SET OrganizationId = @OrganizationId, Name = @Name, AccountCode = @AccountCode, BillingTerms = @BillingTerms, Status = @Status WHERE CustomerId = @CustomerId";
+            var rows = await connection.ExecuteAsync(sql, customer);
+            if (rows > 0)
+                _logger.LogInformation("Updated customer: {Id}", customer.CustomerId);
+            else
                 _logger.LogWarning("Update failed, customer not found: {Id}", customer.CustomerId);
-                return Task.FromResult(false);
-            }
-            existing.Name = customer.Name;
-            _logger.LogInformation("Updated customer: {Id}", customer.CustomerId);
-            return Task.FromResult(true);
+            return rows > 0;
         }
 
-        public Task<bool> DeleteAsync(System.Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
-            var customer = _customers.Find(c => c.CustomerId == id);
-            if (customer == null)
-            {
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "DELETE FROM offermanager.Customer WHERE CustomerId = @Id";
+            var rows = await connection.ExecuteAsync(sql, new { Id = id });
+            if (rows > 0)
+                _logger.LogInformation("Deleted customer: {Id}", id);
+            else
                 _logger.LogWarning("Delete failed, customer not found: {Id}", id);
-                return Task.FromResult(false);
-            }
-            _customers.Remove(customer);
-            _logger.LogInformation("Deleted customer: {Id}", id);
-            return Task.FromResult(true);
+            return rows > 0;
         }
     }
 }
