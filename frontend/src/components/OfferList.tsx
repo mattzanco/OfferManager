@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { offerService, Offer } from '../services/offerService';
-import './OfferList.css';
+import '../styles/List.css';
 
 export function OfferList() {
+  const navigate = useNavigate();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,12 +30,17 @@ export function OfferList() {
   if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div className="offer-list">
-      <h2>Offers</h2>
+    <div className="list-container">
+      <div className="list-header">
+        <h2>Offers</h2>
+        <button onClick={() => navigate('/offers/new')} className="btn-primary">
+          + New Offer
+        </button>
+      </div>
       {offers.length === 0 ? (
-        <p>No offers found.</p>
+        <p>No offers found. <button onClick={() => navigate('/offers/new')} className="link-btn">Create one</button></p>
       ) : (
-        <table>
+        <table className="list-table">
           <thead>
             <tr>
               <th>ID</th>
@@ -49,9 +56,8 @@ export function OfferList() {
                 <td>{new Date(offer.createdDate).toLocaleDateString()}</td>
                 <td>{offer.currentRevisionId || 'N/A'}</td>
                 <td>
-                  <button>View</button>
-                  <button>Edit</button>
-                  <button>Delete</button>
+                  <button onClick={() => navigate(`/offers/${offer.id}`)} className="btn-small">View</button>
+                  <button onClick={() => navigate(`/offers/edit/${offer.id}`)} className="btn-small">Edit</button>
                 </td>
               </tr>
             ))}

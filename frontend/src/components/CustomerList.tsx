@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { customerService, Customer } from '../services/customerService';
-import './CustomerList.css';
+import '../styles/List.css';
 
 export function CustomerList() {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,12 +30,17 @@ export function CustomerList() {
   if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div className="customer-list">
-      <h2>Customers</h2>
+    <div className="list-container">
+      <div className="list-header">
+        <h2>Customers</h2>
+        <button onClick={() => navigate('/customers/new')} className="btn-primary">
+          + New Customer
+        </button>
+      </div>
       {customers.length === 0 ? (
-        <p>No customers found.</p>
+        <p>No customers found. <button onClick={() => navigate('/customers/new')} className="link-btn">Create one</button></p>
       ) : (
-        <table>
+        <table className="list-table">
           <thead>
             <tr>
               <th>ID</th>
@@ -47,9 +54,8 @@ export function CustomerList() {
                 <td>{customer.id}</td>
                 <td>{customer.name}</td>
                 <td>
-                  <button>View</button>
-                  <button>Edit</button>
-                  <button>Delete</button>
+                  <button onClick={() => navigate(`/customers/${customer.id}`)} className="btn-small">View</button>
+                  <button onClick={() => navigate(`/customers/edit/${customer.id}`)} className="btn-small">Edit</button>
                 </td>
               </tr>
             ))}
