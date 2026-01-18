@@ -18,19 +18,6 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Replace default logging with Serilog
-builder.Host.UseSerilog((ctx, lc) => lc
-    .ReadFrom.Configuration(ctx.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.ApplicationInsights(
-        ctx.Configuration["ApplicationInsights:ConnectionString"],
-        TelemetryConverter.Traces,
-        restrictedToMinimumLevel: LogEventLevel.Information)
-);
-
-
-
 // Determine Key Vault name from environment variable, fallback to default
 string keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME") ?? "offermanager-dev-kv";
 string keyVaultUri = $"https://{keyVaultName}.vault.azure.net/";
@@ -53,6 +40,17 @@ catch (Exception ex)
     // In development, log the error but continue - use local configuration
     Log.Warning(ex, "Could not load configuration from Key Vault: {KeyVaultUri}. Falling back to local configuration (appsettings.json)", keyVaultUri);
 }
+
+// Replace default logging with Serilog (after Key Vault is loaded so we get correct connection string)
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.ApplicationInsights(
+        ctx.Configuration["ApplicationInsights:ConnectionString"],
+        TelemetryConverter.Traces,
+        restrictedToMinimumLevel: LogEventLevel.Information)
+);
 
 // Example: Read DB connection string from Key Vault (or fallback to appsettings)
 string? dbConnectionString = builder.Configuration["DbConnectionString"];
