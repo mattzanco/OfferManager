@@ -4,9 +4,9 @@ namespace OfferManager.Domain.Models
 {
     public class OfferCharge
     {
-        public Guid OfferChargeId { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Guid OfferRevisionId { get; set; }
+        public int OfferChargeId { get; set; }
+        public int OrganizationId { get; set; }
+        public int OfferRevisionId { get; set; }
         public string ChargeType { get; set; } = string.Empty;
         public string ChargeCode { get; set; } = string.Empty;
         public string? Description { get; set; }

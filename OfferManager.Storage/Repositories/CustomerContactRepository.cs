@@ -12,7 +12,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class CustomerContactRepository : ICustomerContactRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<CustomerContactRepository> _logger;
 
         public CustomerContactRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<CustomerContactRepository> logger)
@@ -29,7 +29,7 @@ namespace OfferManager.Storage.Repositories
             return await connection.QueryAsync<CustomerContact>(sql);
         }
 
-        public async Task<CustomerContact?> GetByIdAsync(Guid id)
+        public async Task<CustomerContact?> GetByIdAsync(int id)
         {
             _logger.LogDebug("Fetching customer contact by id: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -37,18 +37,16 @@ namespace OfferManager.Storage.Repositories
             return await connection.QuerySingleOrDefaultAsync<CustomerContact>(sql, new { Id = id });
         }
 
-        public async Task<Guid> AddAsync(CustomerContact contact)
+        public async Task<int> AddAsync(CustomerContact contact)
         {
             _logger.LogInformation("Added customer contact: {Id}", contact.ContactId);
             using var connection = new SqlConnection(_connectionString);
-            const string sql = @"INSERT INTO offermanager.CustomerContact (ContactId, OrganizationId, CustomerId, Name, Email, Phone, Title, IsPrimary, CreatedAt)
-                                 VALUES (@ContactId, @OrganizationId, @CustomerId, @Name, @Email, @Phone, @Title, @IsPrimary, @CreatedAt)";
-            if (contact.ContactId == Guid.Empty)
-                contact.ContactId = Guid.NewGuid();
+            const string sql = @"INSERT INTO offermanager.CustomerContact (OrganizationId, CustomerId, Name, Email, Phone, Title, IsPrimary, CreatedAt)
+                                 VALUES (@OrganizationId, @CustomerId, @Name, @Email, @Phone, @Title, @IsPrimary, @CreatedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
             if (contact.CreatedAt == default)
                 contact.CreatedAt = DateTime.UtcNow;
-            await connection.ExecuteAsync(sql, contact);
-            return contact.ContactId;
+            var id = await connection.ExecuteScalarAsync<int>(sql, contact);
+            return id;
         }
 
         public async Task<bool> UpdateAsync(CustomerContact contact)
@@ -60,7 +58,7 @@ namespace OfferManager.Storage.Repositories
             return rows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(int id)
         {
             _logger.LogWarning("Delete failed, customer contact not found: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -70,3 +68,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

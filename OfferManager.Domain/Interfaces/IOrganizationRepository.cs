@@ -7,9 +7,10 @@ namespace OfferManager.Domain.Interfaces
     public interface IOrganizationRepository
     {
         Task<IEnumerable<Organization>> GetAllAsync();
-        Task<Organization?> GetByIdAsync(Guid id);
-        Task<Guid> AddAsync(Organization organization);
+        Task<Organization?> GetByIdAsync(int id);
+        Task<int> AddAsync(Organization organization);
         Task<bool> UpdateAsync(Organization organization);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
     }
 }
+

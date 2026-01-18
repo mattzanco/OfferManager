@@ -26,7 +26,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(int id)
         {
             _logger.LogDebug("Getting offer by id: {Id}", id);
             var offer = await _repository.GetByIdAsync(id);
@@ -43,26 +43,31 @@ namespace OfferManager.WebApi.Controllers
         public async Task<IActionResult> Create([FromBody] Offer offer)
         {
             _logger.LogDebug("Creating new offer");
-            var createdOffer = await _repository.AddAsync(offer);
-            _logger.LogInformation("Created offer: {Id}", createdOffer.Id);
-            return CreatedAtAction(nameof(GetById), new { id = createdOffer.Id }, createdOffer);
+            var createdId = await _repository.AddAsync(offer);
+            offer.Id = createdId;
+            _logger.LogInformation("Created offer: {Id}", createdId);
+            return CreatedAtAction(nameof(GetById), new { id = createdId }, offer);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Offer offer)
+        public async Task<IActionResult> Update(int id, [FromBody] Offer offer)
         {
             _logger.LogDebug("Updating offer: {Id}", id);
             offer.Id = id;
-            var updatedOffer = await _repository.UpdateAsync(offer);
+            var success = await _repository.UpdateAsync(offer);
+            if (!success)
+                return NotFound();
             _logger.LogInformation("Updated offer: {Id}", id);
-            return Ok(updatedOffer);
+            return Ok(offer);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             _logger.LogDebug("Deleting offer: {Id}", id);
-            await _repository.DeleteAsync(id);
+            var success = await _repository.DeleteAsync(id);
+            if (!success)
+                return NotFound();
             _logger.LogInformation("Deleted offer: {Id}", id);
             return NoContent();
         }

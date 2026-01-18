@@ -7,9 +7,10 @@ namespace OfferManager.Domain.Interfaces
     public interface ILaneRepository
     {
         Task<IEnumerable<Lane>> GetAllAsync();
-        Task<Lane?> GetByIdAsync(Guid id);
-        Task<Guid> AddAsync(Lane lane);
+        Task<Lane?> GetByIdAsync(int id);
+        Task<int> AddAsync(Lane lane);
         Task<bool> UpdateAsync(Lane lane);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
     }
 }
+

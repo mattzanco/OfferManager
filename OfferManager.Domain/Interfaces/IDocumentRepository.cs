@@ -7,9 +7,10 @@ namespace OfferManager.Domain.Interfaces
     public interface IDocumentRepository
     {
         Task<IEnumerable<Document>> GetAllAsync();
-        Task<Document?> GetByIdAsync(Guid id);
-        Task<Guid> AddAsync(Document document);
+        Task<Document?> GetByIdAsync(int id);
+        Task<int> AddAsync(Document document);
         Task<bool> UpdateAsync(Document document);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
     }
 }
+

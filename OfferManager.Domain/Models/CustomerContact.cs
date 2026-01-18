@@ -4,9 +4,9 @@ namespace OfferManager.Domain.Models
 {
     public class CustomerContact
     {
-        public Guid ContactId { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Guid CustomerId { get; set; }
+        public int ContactId { get; set; }
+        public int OrganizationId { get; set; }
+        public int CustomerId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Phone { get; set; }

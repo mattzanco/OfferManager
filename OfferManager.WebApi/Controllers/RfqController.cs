@@ -26,7 +26,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(int id)
         {
             _logger.LogDebug("Getting RFQ by id: {Id}", id);
             var rfq = await _repository.GetByIdAsync(id);
@@ -49,7 +49,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Rfq rfq)
+        public async Task<IActionResult> Update(int id, Rfq rfq)
         {
             if (id != rfq.RfqId)
             {
@@ -68,7 +68,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             _logger.LogDebug("Deleting RFQ: {Id}", id);
             var deleted = await _repository.DeleteAsync(id);
@@ -82,3 +82,4 @@ namespace OfferManager.WebApi.Controllers
         }
     }
 }
+

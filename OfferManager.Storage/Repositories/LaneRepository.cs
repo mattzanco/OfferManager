@@ -12,7 +12,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class LaneRepository : ILaneRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<LaneRepository> _logger;
 
         public LaneRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<LaneRepository> logger)
@@ -29,7 +29,7 @@ namespace OfferManager.Storage.Repositories
             return await connection.QueryAsync<Lane>(sql);
         }
 
-        public async Task<Lane?> GetByIdAsync(Guid id)
+        public async Task<Lane?> GetByIdAsync(int id)
         {
             _logger.LogDebug("Fetching lane by id: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -37,18 +37,16 @@ namespace OfferManager.Storage.Repositories
             return await connection.QuerySingleOrDefaultAsync<Lane>(sql, new { Id = id });
         }
 
-        public async Task<Guid> AddAsync(Lane lane)
+        public async Task<int> AddAsync(Lane lane)
         {
             _logger.LogInformation("Added lane: {Id}", lane.LaneId);
             using var connection = new SqlConnection(_connectionString);
-            const string sql = @"INSERT INTO offermanager.Lane (LaneId, OrganizationId, OriginLocationId, DestinationLocationId, LaneCode, DistanceMiles, CreatedAt)
-                                 VALUES (@LaneId, @OrganizationId, @OriginLocationId, @DestinationLocationId, @LaneCode, @DistanceMiles, @CreatedAt)";
-            if (lane.LaneId == Guid.Empty)
-                lane.LaneId = Guid.NewGuid();
+            const string sql = @"INSERT INTO offermanager.Lane (OrganizationId, OriginLocationId, DestinationLocationId, LaneCode, DistanceMiles, CreatedAt)
+                                 VALUES (@OrganizationId, @OriginLocationId, @DestinationLocationId, @LaneCode, @DistanceMiles, @CreatedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
             if (lane.CreatedAt == default)
                 lane.CreatedAt = DateTime.UtcNow;
-            await connection.ExecuteAsync(sql, lane);
-            return lane.LaneId;
+            var id = await connection.ExecuteScalarAsync<int>(sql, lane);
+            return id;
         }
 
         public async Task<bool> UpdateAsync(Lane lane)
@@ -60,7 +58,7 @@ namespace OfferManager.Storage.Repositories
             return rows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(int id)
         {
             _logger.LogWarning("Delete failed, lane not found: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -70,3 +68,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

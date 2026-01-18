@@ -26,9 +26,9 @@ namespace OfferManager.Tests
         {
             var mockRepo = new Mock<ICustomerRepository>();
             var expected = new Customer { Name = "Test Customer" };
-            var newId = Guid.NewGuid();
+            var newId = new System.Random().Next(1, 10000);
             mockRepo.Setup(r => r.AddAsync(It.IsAny<Customer>())).ReturnsAsync(newId);
-            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(expected);
+            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(expected);
 
             var id = await mockRepo.Object.AddAsync(new Customer { Name = "Test Customer" });
             var customer = await mockRepo.Object.GetByIdAsync(id);
@@ -36,3 +36,5 @@ namespace OfferManager.Tests
         }
     }
 }
+
+

@@ -12,7 +12,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<CustomerRepository> _logger;
 
         public CustomerRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<CustomerRepository> logger)
@@ -29,7 +29,7 @@ namespace OfferManager.Storage.Repositories
             return await connection.QueryAsync<Customer>(sql);
         }
 
-        public async Task<Customer?> GetByIdAsync(Guid id)
+        public async Task<Customer?> GetByIdAsync(int id)
         {
             _logger.LogDebug("Fetching customer by id: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -42,18 +42,16 @@ namespace OfferManager.Storage.Repositories
             return customer;
         }
 
-        public async Task<Guid> AddAsync(Customer customer)
+        public async Task<int> AddAsync(Customer customer)
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = @"INSERT INTO offermanager.Customer (CustomerId, OrganizationId, Name, AccountCode, BillingTerms, Status, CreatedAt)
-                                 VALUES (@CustomerId, @OrganizationId, @Name, @AccountCode, @BillingTerms, @Status, @CreatedAt)";
-            if (customer.CustomerId == Guid.Empty)
-                customer.CustomerId = Guid.NewGuid();
+            const string sql = @"INSERT INTO offermanager.Customer (OrganizationId, Name, AccountCode, BillingTerms, Status, CreatedAt)
+                                 VALUES (@OrganizationId, @Name, @AccountCode, @BillingTerms, @Status, @CreatedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
             if (customer.CreatedAt == default)
                 customer.CreatedAt = DateTime.UtcNow;
-            await connection.ExecuteAsync(sql, customer);
-            _logger.LogInformation("Added customer: {Id}", customer.CustomerId);
-            return customer.CustomerId;
+            var id = await connection.ExecuteScalarAsync<int>(sql, customer);
+            _logger.LogInformation("Added customer: {Id}", id);
+            return id;
         }
 
         public async Task<bool> UpdateAsync(Customer customer)
@@ -68,7 +66,7 @@ namespace OfferManager.Storage.Repositories
             return rows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = "DELETE FROM offermanager.Customer WHERE CustomerId = @Id";
@@ -81,3 +79,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

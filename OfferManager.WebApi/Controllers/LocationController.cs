@@ -26,7 +26,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(int id)
         {
             _logger.LogDebug("Getting location by id: {Id}", id);
             var location = await _repository.GetByIdAsync(id);
@@ -49,7 +49,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Location location)
+        public async Task<IActionResult> Update(int id, Location location)
         {
             if (id != location.LocationId)
             {
@@ -68,7 +68,7 @@ namespace OfferManager.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             _logger.LogDebug("Deleting location: {Id}", id);
             var deleted = await _repository.DeleteAsync(id);

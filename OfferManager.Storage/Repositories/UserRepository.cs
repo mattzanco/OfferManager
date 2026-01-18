@@ -12,7 +12,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<UserRepository> _logger;
 
         public UserRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<UserRepository> logger)
@@ -84,3 +84,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

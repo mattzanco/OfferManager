@@ -27,8 +27,8 @@ namespace OfferManager.Tests
         {
             var mockRepo = new Mock<IDocumentRepository>();
             var expected = new Document { FileName = "TestDoc.pdf" };
-            mockRepo.Setup(r => r.AddAsync(It.IsAny<Document>())).ReturnsAsync(Guid.NewGuid());
-            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(expected);
+            mockRepo.Setup(r => r.AddAsync(It.IsAny<Document>())).ReturnsAsync(new System.Random().Next(1, 10000));
+            mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(expected);
 
             var id = await mockRepo.Object.AddAsync(new Document { FileName = "TestDoc.pdf" });
             var doc = await mockRepo.Object.GetByIdAsync(id);
@@ -48,8 +48,8 @@ namespace OfferManager.Tests
         public async Task Delete_ReturnsFalse()
         {
             var mockRepo = new Mock<IDocumentRepository>();
-            mockRepo.Setup(r => r.DeleteAsync(It.IsAny<Guid>())).ReturnsAsync(false);
-            var result = await mockRepo.Object.DeleteAsync(Guid.NewGuid());
+            mockRepo.Setup(r => r.DeleteAsync(It.IsAny<int>())).ReturnsAsync(false);
+            var result = await mockRepo.Object.DeleteAsync(new System.Random().Next(1, 10000));
             Assert.False(result);
         }
 
@@ -63,3 +63,5 @@ namespace OfferManager.Tests
         }
     }
 }
+
+

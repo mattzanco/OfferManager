@@ -11,7 +11,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class OfferRepository : IOfferRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
 
         public OfferRepository(IConfiguration configuration)
         {
@@ -63,3 +63,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

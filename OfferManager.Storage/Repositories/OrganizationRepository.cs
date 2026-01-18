@@ -12,7 +12,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class OrganizationRepository : IOrganizationRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<OrganizationRepository> _logger;
 
         public OrganizationRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<OrganizationRepository> logger)
@@ -29,7 +29,7 @@ namespace OfferManager.Storage.Repositories
             return await connection.QueryAsync<Organization>(sql);
         }
 
-        public async Task<Organization?> GetByIdAsync(Guid id)
+        public async Task<Organization?> GetByIdAsync(int id)
         {
             _logger.LogDebug("Fetching organization by id: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -37,18 +37,16 @@ namespace OfferManager.Storage.Repositories
             return await connection.QuerySingleOrDefaultAsync<Organization>(sql, new { Id = id });
         }
 
-        public async Task<Guid> AddAsync(Organization organization)
+        public async Task<int> AddAsync(Organization organization)
         {
             _logger.LogInformation("Added organization: {Id}", organization.OrganizationId);
             using var connection = new SqlConnection(_connectionString);
-            const string sql = @"INSERT INTO offermanager.Organization (OrganizationId, Name, CreatedAt)
-                                 VALUES (@OrganizationId, @Name, @CreatedAt)";
-            if (organization.OrganizationId == Guid.Empty)
-                organization.OrganizationId = Guid.NewGuid();
+            const string sql = @"INSERT INTO offermanager.Organization (Name, CreatedAt)
+                                 VALUES (@Name, @CreatedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
             if (organization.CreatedAt == default)
                 organization.CreatedAt = DateTime.UtcNow;
-            await connection.ExecuteAsync(sql, organization);
-            return organization.OrganizationId;
+            var id = await connection.ExecuteScalarAsync<int>(sql, organization);
+            return id;
         }
 
         public async Task<bool> UpdateAsync(Organization organization)
@@ -60,7 +58,7 @@ namespace OfferManager.Storage.Repositories
             return rows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(int id)
         {
             _logger.LogWarning("Delete failed, organization not found: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -70,3 +68,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

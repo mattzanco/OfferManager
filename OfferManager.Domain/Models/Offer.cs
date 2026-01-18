@@ -7,12 +7,12 @@ public class Offer
     public string? Description { get; set; }
     public decimal Price { get; set; }
     // Add properties to match repository and DB schema
-    public Guid OrganizationId { get; set; }
-    public Guid? RfqId { get; set; }
-    public Guid CustomerId { get; set; }
+    public int OrganizationId { get; set; }
+    public int? RfqId { get; set; }
+    public int CustomerId { get; set; }
     public string Status { get; set; } = "Draft";
-    public Guid? CurrentRevisionId { get; set; }
-    public Guid CreatedByUserId { get; set; }
+    public int? CurrentRevisionId { get; set; }
+    public int CreatedByUserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

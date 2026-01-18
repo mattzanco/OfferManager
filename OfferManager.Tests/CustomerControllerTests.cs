@@ -16,7 +16,7 @@ namespace OfferManager.Tests
         public async Task GetAll_ReturnsOkResult()
         {
             var mockRepo = new Mock<ICustomerRepository>();
-            mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Customer> { new Customer { CustomerId = Guid.NewGuid(), Name = "Acme" } });
+            mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Customer> { new Customer { CustomerId = new System.Random().Next(1, 10000), Name = "Acme" } });
             var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<OfferManager.WebApi.Controllers.CustomerController>>();
             var controller = new CustomerController(mockRepo.Object, mockLogger.Object);
             var result = await controller.GetAll();
@@ -24,3 +24,5 @@ namespace OfferManager.Tests
         }
     }
 }
+
+

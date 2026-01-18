@@ -11,7 +11,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class RoleRepository : IRoleRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<RoleRepository> _logger;
 
         public RoleRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<RoleRepository> logger)
@@ -64,3 +64,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

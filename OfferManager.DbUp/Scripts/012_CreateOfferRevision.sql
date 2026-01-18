@@ -1,9 +1,8 @@
 
 CREATE TABLE offermanager.OfferRevision (
-    OfferRevisionId UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_OfferRevision PRIMARY KEY CLUSTERED
-        DEFAULT NEWSEQUENTIALID(),
-    OrganizationId UNIQUEIDENTIFIER NOT NULL,
-    OfferId UNIQUEIDENTIFIER NOT NULL,
+    OfferRevisionId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_OfferRevision PRIMARY KEY CLUSTERED,
+    OrganizationId INT NOT NULL,
+    OfferId INT NOT NULL,
     RevisionNumber INT NOT NULL,
     ValidFromAt DATETIME2(3) NULL,
     ValidUntilAt DATETIME2(3) NULL,
@@ -19,7 +18,7 @@ CREATE TABLE offermanager.OfferRevision (
                     WHEN TotalSell IS NULL OR TotalSell = 0 OR TotalCost IS NULL THEN NULL
                     ELSE ((TotalSell - TotalCost) / NULLIF(TotalSell,0))
                   END) PERSISTED,
-    CreatedByUserId UNIQUEIDENTIFIER NOT NULL,
+    CreatedByUserId INT NOT NULL,
     CreatedAt DATETIME2(3) NOT NULL CONSTRAINT DF_OfferRevision_CreatedAt DEFAULT SYSUTCDATETIME(),
     CONSTRAINT FK_OfferRevision_Organization FOREIGN KEY (OrganizationId)
         REFERENCES offermanager.Organization(OrganizationId),

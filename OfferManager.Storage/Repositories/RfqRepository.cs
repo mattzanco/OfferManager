@@ -12,7 +12,7 @@ namespace OfferManager.Storage.Repositories
 {
     public class RfqRepository : IRfqRepository
     {
-        private readonly string _connectionString;
+        private readonly string? _connectionString;
         private readonly Microsoft.Extensions.Logging.ILogger<RfqRepository> _logger;
 
         public RfqRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<RfqRepository> logger)
@@ -29,7 +29,7 @@ namespace OfferManager.Storage.Repositories
             return await connection.QueryAsync<Rfq>(sql);
         }
 
-        public async Task<Rfq?> GetByIdAsync(Guid id)
+        public async Task<Rfq?> GetByIdAsync(int id)
         {
             _logger.LogDebug("Fetching RFQ by id: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -37,20 +37,18 @@ namespace OfferManager.Storage.Repositories
             return await connection.QuerySingleOrDefaultAsync<Rfq>(sql, new { Id = id });
         }
 
-        public async Task<Guid> AddAsync(Rfq rfq)
+        public async Task<int> AddAsync(Rfq rfq)
         {
             _logger.LogInformation("Added RFQ: {Id}", rfq.RfqId);
             using var connection = new SqlConnection(_connectionString);
-            const string sql = @"INSERT INTO offermanager.Rfq (RfqId, OrganizationId, CustomerId, RequestedByContactId, OriginLocationId, DestinationLocationId, Mode, EquipmentType, ServiceLevel, PickupEarliestAt, PickupLatestAt, DeliveryEarliestAt, DeliveryLatestAt, Commodity, WeightLbs, PalletCount, PieceCount, Hazmat, TemperatureControlled, Notes, Status, CreatedByUserId, CreatedAt, UpdatedAt)
-                                 VALUES (@RfqId, @OrganizationId, @CustomerId, @RequestedByContactId, @OriginLocationId, @DestinationLocationId, @Mode, @EquipmentType, @ServiceLevel, @PickupEarliestAt, @PickupLatestAt, @DeliveryEarliestAt, @DeliveryLatestAt, @Commodity, @WeightLbs, @PalletCount, @PieceCount, @Hazmat, @TemperatureControlled, @Notes, @Status, @CreatedByUserId, @CreatedAt, @UpdatedAt)";
-            if (rfq.RfqId == Guid.Empty)
-                rfq.RfqId = Guid.NewGuid();
+            const string sql = @"INSERT INTO offermanager.Rfq (OrganizationId, CustomerId, RequestedByContactId, OriginLocationId, DestinationLocationId, Mode, EquipmentType, ServiceLevel, PickupEarliestAt, PickupLatestAt, DeliveryEarliestAt, DeliveryLatestAt, Commodity, WeightLbs, PalletCount, PieceCount, Hazmat, TemperatureControlled, Notes, Status, CreatedByUserId, CreatedAt, UpdatedAt)
+                                 VALUES (@OrganizationId, @CustomerId, @RequestedByContactId, @OriginLocationId, @DestinationLocationId, @Mode, @EquipmentType, @ServiceLevel, @PickupEarliestAt, @PickupLatestAt, @DeliveryEarliestAt, @DeliveryLatestAt, @Commodity, @WeightLbs, @PalletCount, @PieceCount, @Hazmat, @TemperatureControlled, @Notes, @Status, @CreatedByUserId, @CreatedAt, @UpdatedAt); SELECT CAST(SCOPE_IDENTITY() as int);";
             if (rfq.CreatedAt == default)
                 rfq.CreatedAt = DateTime.UtcNow;
             if (rfq.UpdatedAt == default)
                 rfq.UpdatedAt = DateTime.UtcNow;
-            await connection.ExecuteAsync(sql, rfq);
-            return rfq.RfqId;
+            var id = await connection.ExecuteScalarAsync<int>(sql, rfq);
+            return id;
         }
 
         public async Task<bool> UpdateAsync(Rfq rfq)
@@ -63,7 +61,7 @@ namespace OfferManager.Storage.Repositories
             return rows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(int id)
         {
             _logger.LogWarning("Delete failed, RFQ not found: {Id}", id);
             using var connection = new SqlConnection(_connectionString);
@@ -73,3 +71,4 @@ namespace OfferManager.Storage.Repositories
         }
     }
 }
+

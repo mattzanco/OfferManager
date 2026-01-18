@@ -1,14 +1,13 @@
 
 CREATE TABLE offermanager.ActivityEvent (
-    EventId UNIQUEIDENTIFIER NOT NULL CONSTRAINT PK_ActivityEvent PRIMARY KEY CLUSTERED
-        DEFAULT NEWSEQUENTIALID(),
-    OrganizationId UNIQUEIDENTIFIER NOT NULL,
+    EventId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ActivityEvent PRIMARY KEY CLUSTERED,
+    OrganizationId INT NOT NULL,
     EntityType NVARCHAR(30) NOT NULL,
-    EntityId UNIQUEIDENTIFIER NOT NULL,
+    EntityId INT NOT NULL,
     EventType NVARCHAR(50) NOT NULL,
     OldValue NVARCHAR(MAX) NULL,
     NewValue NVARCHAR(MAX) NULL,
-    PerformedByUserId UNIQUEIDENTIFIER NOT NULL,
+    PerformedByUserId INT NOT NULL,
     CreatedAt DATETIME2(3) NOT NULL CONSTRAINT DF_ActivityEvent_CreatedAt DEFAULT SYSUTCDATETIME(),
     CONSTRAINT FK_ActivityEvent_Organization FOREIGN KEY (OrganizationId)
         REFERENCES offermanager.Organization(OrganizationId),

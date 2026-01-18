@@ -4,9 +4,9 @@ namespace OfferManager.Domain.Models
 {
     public class RfqAccessorial
     {
-        public Guid RfqAccessorialId { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Guid RfqId { get; set; }
+        public int RfqAccessorialId { get; set; }
+        public int OrganizationId { get; set; }
+        public int RfqId { get; set; }
         public string AccessorialCode { get; set; } = string.Empty;
         public string? Description { get; set; }
         public decimal Quantity { get; set; }
