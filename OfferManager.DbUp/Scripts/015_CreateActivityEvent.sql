@@ -1,18 +1,26 @@
 
-CREATE TABLE offermanager.ActivityEvent (
-    EventId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ActivityEvent PRIMARY KEY CLUSTERED,
-    OrganizationId INT NOT NULL,
-    EntityType NVARCHAR(30) NOT NULL,
-    EntityId INT NOT NULL,
-    EventType NVARCHAR(50) NOT NULL,
-    OldValue NVARCHAR(MAX) NULL,
-    NewValue NVARCHAR(MAX) NULL,
-    PerformedByUserId INT NOT NULL,
-    CreatedAt DATETIME2(3) NOT NULL CONSTRAINT DF_ActivityEvent_CreatedAt DEFAULT SYSUTCDATETIME(),
-    CONSTRAINT FK_ActivityEvent_Organization FOREIGN KEY (OrganizationId)
-        REFERENCES offermanager.Organization(OrganizationId),
-    CONSTRAINT FK_ActivityEvent_PerformedBy FOREIGN KEY (PerformedByUserId)
-        REFERENCES offermanager.[User](UserId)
-);
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ActivityEvent' AND schema_id = SCHEMA_ID('offermanager'))
+BEGIN
+    CREATE TABLE offermanager.ActivityEvent (
+        EventId INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ActivityEvent PRIMARY KEY CLUSTERED,
+        OrganizationId INT NOT NULL,
+        EntityType NVARCHAR(30) NOT NULL,
+        EntityId INT NOT NULL,
+        EventType NVARCHAR(50) NOT NULL,
+        OldValue NVARCHAR(MAX) NULL,
+        NewValue NVARCHAR(MAX) NULL,
+        PerformedByUserId INT NOT NULL,
+        CreatedAt DATETIME2(3) NOT NULL CONSTRAINT DF_ActivityEvent_CreatedAt DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_ActivityEvent_Organization FOREIGN KEY (OrganizationId)
+            REFERENCES offermanager.Organization(OrganizationId),
+        CONSTRAINT FK_ActivityEvent_PerformedBy FOREIGN KEY (PerformedByUserId)
+            REFERENCES offermanager.[User](UserId)
+    );
 
-CREATE INDEX IX_ActivityEvent_Org_Entity ON offermanager.ActivityEvent (OrganizationId, EntityType, EntityId, CreatedAt DESC);
+    CREATE INDEX IX_ActivityEvent_Org_Entity ON offermanager.ActivityEvent (OrganizationId, EntityType, EntityId, CreatedAt DESC);
+    PRINT 'Created table: offermanager.ActivityEvent'
+END
+ELSE
+BEGIN
+    PRINT 'Table offermanager.ActivityEvent already exists'
+END
