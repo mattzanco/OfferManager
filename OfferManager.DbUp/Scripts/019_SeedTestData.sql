@@ -3,35 +3,35 @@
 
 SET IDENTITY_INSERT offermanager.Organization ON;
 INSERT INTO offermanager.Organization (OrganizationId, Name, CreatedAt) VALUES
-(1, 'Acme Logistics Inc', GETUTCDATE()),
-(2, 'Global Freight Solutions', GETUTCDATE()),
-(3, 'Premier Transport Group', GETUTCDATE());
+(1, 'Acme Logistics Inc', SYSUTCDATETIME()),
+(2, 'Global Freight Solutions', SYSUTCDATETIME()),
+(3, 'Premier Transport Group', SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.Organization OFF;
 
 SET IDENTITY_INSERT offermanager.[User] ON;
-INSERT INTO offermanager.[User] (UserId, Username, Email, OrganizationId, CreatedAt) VALUES
-(1, 'admin_user', 'admin@acmelogistics.com', 1, GETUTCDATE()),
-(2, 'sales_manager', 'sales@acmelogistics.com', 1, GETUTCDATE()),
-(3, 'pricing_analyst', 'pricing@acmelogistics.com', 1, GETUTCDATE()),
-(4, 'operations_user', 'ops@acmelogistics.com', 1, GETUTCDATE()),
-(5, 'admin_global', 'admin@globalfreight.com', 2, GETUTCDATE()),
-(6, 'sales_global', 'sales@globalfreight.com', 2, GETUTCDATE()),
-(7, 'admin_premier', 'admin@premiergroup.com', 3, GETUTCDATE()),
-(8, 'ops_premier', 'ops@premiergroup.com', 3, GETUTCDATE());
+INSERT INTO offermanager.[User] (UserId, OrganizationId, Email, DisplayName, IsActive, CreatedAt) VALUES
+(1, 1, 'admin@acmelogistics.com', 'Admin User', 1, SYSUTCDATETIME()),
+(2, 1, 'sales@acmelogistics.com', 'Sales Manager', 1, SYSUTCDATETIME()),
+(3, 1, 'pricing@acmelogistics.com', 'Pricing Analyst', 1, SYSUTCDATETIME()),
+(4, 1, 'ops@acmelogistics.com', 'Operations User', 1, SYSUTCDATETIME()),
+(5, 2, 'admin@globalfreight.com', 'Global Admin', 1, SYSUTCDATETIME()),
+(6, 2, 'sales@globalfreight.com', 'Global Sales', 1, SYSUTCDATETIME()),
+(7, 3, 'admin@premiergroup.com', 'Premier Admin', 1, SYSUTCDATETIME()),
+(8, 3, 'ops@premiergroup.com', 'Premier Operations', 1, SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.[User] OFF;
 
 SET IDENTITY_INSERT offermanager.Role ON;
-INSERT INTO offermanager.Role (RoleId, RoleName, Description) VALUES
-(1, 'Admin', 'Full system access'),
-(2, 'Sales', 'Sales and quote management'),
-(3, 'Pricing', 'Pricing and cost analysis'),
-(4, 'Operations', 'Operational tasks'),
-(5, 'Viewer', 'Read-only access');
+INSERT INTO offermanager.Role (RoleId, Name) VALUES
+(1, 'Admin'),
+(2, 'Sales'),
+(3, 'Pricing'),
+(4, 'Operations'),
+(5, 'Viewer');
 SET IDENTITY_INSERT offermanager.Role OFF;
 
 -- Assign roles to users
 INSERT INTO offermanager.UserRole (UserId, RoleId) VALUES
-(1, 1), -- admin_user is Admin
+(1, 1), -- admin is Admin
 (2, 2), -- sales_manager is Sales
 (3, 3), -- pricing_analyst is Pricing
 (4, 4), -- operations_user is Operations
@@ -41,63 +41,63 @@ INSERT INTO offermanager.UserRole (UserId, RoleId) VALUES
 (8, 4); -- ops_premier is Operations
 
 SET IDENTITY_INSERT offermanager.Customer ON;
-INSERT INTO offermanager.Customer (CustomerId, OrganizationId, CustomerName, CustomerCode, CreatedAt) VALUES
-(1, 1, 'TechCore Manufacturing', 'TECH001', GETUTCDATE()),
-(2, 1, 'ElectroSupply Corp', 'ELEC002', GETUTCDATE()),
-(3, 1, 'BuildRight Construction', 'BUILD003', GETUTCDATE()),
-(4, 1, 'FreshFood Distributors', 'FRESH004', GETUTCDATE()),
-(5, 2, 'AdvancedAuto Parts', 'AUTO005', GETUTCDATE()),
-(6, 2, 'MediCare Pharma', 'MED006', GETUTCDATE()),
-(7, 3, 'RetailMart Stores', 'RETAIL007', GETUTCDATE()),
-(8, 3, 'FashionHub Distribution', 'FASH008', GETUTCDATE());
+INSERT INTO offermanager.Customer (CustomerId, OrganizationId, CustomerName, CreatedAt) VALUES
+(1, 1, 'TechCore Manufacturing', SYSUTCDATETIME()),
+(2, 1, 'ElectroSupply Corp', SYSUTCDATETIME()),
+(3, 1, 'BuildRight Construction', SYSUTCDATETIME()),
+(4, 1, 'FreshFood Distributors', SYSUTCDATETIME()),
+(5, 2, 'AdvancedAuto Parts', SYSUTCDATETIME()),
+(6, 2, 'MediCare Pharma', SYSUTCDATETIME()),
+(7, 3, 'RetailMart Stores', SYSUTCDATETIME()),
+(8, 3, 'FashionHub Distribution', SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.Customer OFF;
 
 SET IDENTITY_INSERT offermanager.CustomerContact ON;
 INSERT INTO offermanager.CustomerContact (ContactId, OrganizationId, CustomerId, ContactName, Phone, Email, CreatedAt) VALUES
-(1, 1, 1, 'John Smith', '555-0101', 'john.smith@techcore.com', GETUTCDATE()),
-(2, 1, 1, 'Sarah Johnson', '555-0102', 'sarah.johnson@techcore.com', GETUTCDATE()),
-(3, 1, 2, 'Mike Chen', '555-0201', 'mike.chen@electrosupply.com', GETUTCDATE()),
-(4, 1, 3, 'Lisa Anderson', '555-0301', 'lisa.anderson@buildright.com', GETUTCDATE()),
-(5, 1, 4, 'David Martinez', '555-0401', 'david@freshfood.com', GETUTCDATE()),
-(6, 2, 5, 'Rachel Thompson', '555-0501', 'rachel@advancedauto.com', GETUTCDATE()),
-(7, 2, 6, 'Robert Kim', '555-0601', 'robert@medicare.com', GETUTCDATE()),
-(8, 3, 7, 'Jennifer Lee', '555-0701', 'jen@retailmart.com', GETUTCDATE()),
-(9, 3, 8, 'William Garcia', '555-0801', 'william@fashionhub.com', GETUTCDATE());
+(1, 1, 1, 'John Smith', '555-0101', 'john.smith@techcore.com', SYSUTCDATETIME()),
+(2, 1, 1, 'Sarah Johnson', '555-0102', 'sarah.johnson@techcore.com', SYSUTCDATETIME()),
+(3, 1, 2, 'Mike Chen', '555-0201', 'mike.chen@electrosupply.com', SYSUTCDATETIME()),
+(4, 1, 3, 'Lisa Anderson', '555-0301', 'lisa.anderson@buildright.com', SYSUTCDATETIME()),
+(5, 1, 4, 'David Martinez', '555-0401', 'david@freshfood.com', SYSUTCDATETIME()),
+(6, 2, 5, 'Rachel Thompson', '555-0501', 'rachel@advancedauto.com', SYSUTCDATETIME()),
+(7, 2, 6, 'Robert Kim', '555-0601', 'robert@medicare.com', SYSUTCDATETIME()),
+(8, 3, 7, 'Jennifer Lee', '555-0701', 'jen@retailmart.com', SYSUTCDATETIME()),
+(9, 3, 8, 'William Garcia', '555-0801', 'william@fashionhub.com', SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.CustomerContact OFF;
 
 SET IDENTITY_INSERT offermanager.Location ON;
 INSERT INTO offermanager.Location (LocationId, OrganizationId, LocationName, City, State, Country, PostalCode, CreatedAt) VALUES
-(1, 1, 'Los Angeles Distribution Center', 'Los Angeles', 'CA', 'USA', '90001', GETUTCDATE()),
-(2, 1, 'Dallas Hub', 'Dallas', 'TX', 'USA', '75001', GETUTCDATE()),
-(3, 1, 'Chicago Warehouse', 'Chicago', 'IL', 'USA', '60601', GETUTCDATE()),
-(4, 1, 'New York Terminal', 'New York', 'NY', 'USA', '10001', GETUTCDATE()),
-(5, 2, 'Miami Port Terminal', 'Miami', 'FL', 'USA', '33101', GETUTCDATE()),
-(6, 2, 'Denver Distribution', 'Denver', 'CO', 'USA', '80001', GETUTCDATE()),
-(7, 3, 'Seattle Warehouse', 'Seattle', 'WA', 'USA', '98101', GETUTCDATE()),
-(8, 3, 'Atlanta Logistics Center', 'Atlanta', 'GA', 'USA', '30303', GETUTCDATE());
+(1, 1, 'Los Angeles Distribution Center', 'Los Angeles', 'CA', 'USA', '90001', SYSUTCDATETIME()),
+(2, 1, 'Dallas Hub', 'Dallas', 'TX', 'USA', '75001', SYSUTCDATETIME()),
+(3, 1, 'Chicago Warehouse', 'Chicago', 'IL', 'USA', '60601', SYSUTCDATETIME()),
+(4, 1, 'New York Terminal', 'New York', 'NY', 'USA', '10001', SYSUTCDATETIME()),
+(5, 2, 'Miami Port Terminal', 'Miami', 'FL', 'USA', '33101', SYSUTCDATETIME()),
+(6, 2, 'Denver Distribution', 'Denver', 'CO', 'USA', '80001', SYSUTCDATETIME()),
+(7, 3, 'Seattle Warehouse', 'Seattle', 'WA', 'USA', '98101', SYSUTCDATETIME()),
+(8, 3, 'Atlanta Logistics Center', 'Atlanta', 'GA', 'USA', '30303', SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.Location OFF;
 
 SET IDENTITY_INSERT offermanager.Lane ON;
 INSERT INTO offermanager.Lane (LaneId, OrganizationId, OriginLocationId, DestinationLocationId, LaneName, Distance, EstimatedDays, CreatedAt) VALUES
-(1, 1, 1, 2, 'LA to Dallas', 1435, 2, GETUTCDATE()),
-(2, 1, 1, 3, 'LA to Chicago', 2008, 3, GETUTCDATE()),
-(3, 1, 1, 4, 'LA to New York', 2800, 4, GETUTCDATE()),
-(4, 1, 2, 1, 'Dallas to LA', 1435, 2, GETUTCDATE()),
-(5, 1, 2, 3, 'Dallas to Chicago', 926, 1, GETUTCDATE()),
-(6, 1, 3, 4, 'Chicago to New York', 790, 1, GETUTCDATE()),
-(7, 2, 5, 6, 'Miami to Denver', 2038, 3, GETUTCDATE()),
-(8, 3, 7, 8, 'Seattle to Atlanta', 2325, 3, GETUTCDATE());
+(1, 1, 1, 2, 'LA to Dallas', 1435, 2, SYSUTCDATETIME()),
+(2, 1, 1, 3, 'LA to Chicago', 2008, 3, SYSUTCDATETIME()),
+(3, 1, 1, 4, 'LA to New York', 2800, 4, SYSUTCDATETIME()),
+(4, 1, 2, 1, 'Dallas to LA', 1435, 2, SYSUTCDATETIME()),
+(5, 1, 2, 3, 'Dallas to Chicago', 926, 1, SYSUTCDATETIME()),
+(6, 1, 3, 4, 'Chicago to New York', 790, 1, SYSUTCDATETIME()),
+(7, 2, 5, 6, 'Miami to Denver', 2038, 3, SYSUTCDATETIME()),
+(8, 3, 7, 8, 'Seattle to Atlanta', 2325, 3, SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.Lane OFF;
 
 SET IDENTITY_INSERT offermanager.Rfq ON;
-INSERT INTO offermanager.Rfq (RfqId, OrganizationId, CustomerId, ShipmentDate, PickupLocationId, DeliveryLocationId, Weight, CreatedByUserId, CreatedAt) VALUES
-(1, 1, 1, DATEADD(day, 7, GETUTCDATE()), 1, 2, 25000, 2, GETUTCDATE()),
-(2, 1, 1, DATEADD(day, 14, GETUTCDATE()), 1, 3, 35000, 2, GETUTCDATE()),
-(3, 1, 2, DATEADD(day, 10, GETUTCDATE()), 1, 4, 15000, 2, GETUTCDATE()),
-(4, 1, 3, DATEADD(day, 5, GETUTCDATE()), 2, 1, 42000, 2, GETUTCDATE()),
-(5, 1, 4, DATEADD(day, 21, GETUTCDATE()), 2, 3, 28000, 2, GETUTCDATE()),
-(6, 2, 5, DATEADD(day, 8, GETUTCDATE()), 5, 6, 20000, 6, GETUTCDATE()),
-(7, 2, 6, DATEADD(day, 12, GETUTCDATE()), 5, 6, 10000, 6, GETUTCDATE()),
+INSERT INTO offermanager.Rfq (RfqId, OrganizationId, CustomerId, OriginLocationId, DestinationLocationId, Weight, CreatedByUserId, CreatedAt) VALUES
+(1, 1, 1, 1, 2, 25000, 2, SYSUTCDATETIME()),
+(2, 1, 1, 1, 3, 35000, 2, SYSUTCDATETIME()),
+(3, 1, 2, 1, 4, 15000, 2, SYSUTCDATETIME()),
+(4, 1, 3, 2, 1, 42000, 2, SYSUTCDATETIME()),
+(5, 1, 4, 2, 3, 28000, 2, SYSUTCDATETIME()),
+(6, 2, 5, 5, 6, 20000, 6, SYSUTCDATETIME()),
+(7, 2, 6, 5, 6, 10000, 6, SYSUTCDATETIME()),
 (8, 3, 7, DATEADD(day, 6, GETUTCDATE()), 7, 8, 55000, 8, GETUTCDATE()),
 (9, 3, 8, DATEADD(day, 15, GETUTCDATE()), 7, 8, 32000, 8, GETUTCDATE()),
 (10, 1, 1, DATEADD(day, 30, GETUTCDATE()), 3, 4, 18000, 2, GETUTCDATE());
