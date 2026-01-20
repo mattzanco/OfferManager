@@ -209,21 +209,6 @@ INSERT INTO offermanager.ActivityEvent (EventId, OrganizationId, EntityType, Ent
 (9, 3, 'Load', 2, 'Load_Created', 8, DATEADD(day, -3, SYSUTCDATETIME())),
 (10, 3, 'Load', 2, 'Milestone_Completed', 8, SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.ActivityEvent OFF;
-(2, 'Global Freight Solutions', SYSUTCDATETIME()),
-(3, 'Premier Transport Group', SYSUTCDATETIME());
-SET IDENTITY_INSERT offermanager.Organization OFF;
-
-SET IDENTITY_INSERT offermanager.[User] ON;
-INSERT INTO offermanager.[User] (UserId, OrganizationId, Email, DisplayName, IsActive, CreatedAt) VALUES
-(1, 1, 'admin@acmelogistics.com', 'Admin User', 1, SYSUTCDATETIME()),
-(2, 1, 'sales@acmelogistics.com', 'Sales Manager', 1, SYSUTCDATETIME()),
-(3, 1, 'pricing@acmelogistics.com', 'Pricing Analyst', 1, SYSUTCDATETIME()),
-(4, 1, 'ops@acmelogistics.com', 'Operations User', 1, SYSUTCDATETIME()),
-(5, 2, 'admin@globalfreight.com', 'Global Admin', 1, SYSUTCDATETIME()),
-(6, 2, 'sales@globalfreight.com', 'Global Sales', 1, SYSUTCDATETIME()),
-(7, 3, 'admin@premiergroup.com', 'Premier Admin', 1, SYSUTCDATETIME()),
-(8, 3, 'ops@premiergroup.com', 'Premier Operations', 1, SYSUTCDATETIME());
-SET IDENTITY_INSERT offermanager.[User] OFF;
 
 SET IDENTITY_INSERT offermanager.Role ON;
 INSERT INTO offermanager.Role (RoleId, Name) VALUES
