@@ -59,15 +59,15 @@ INSERT INTO offermanager.CustomerContact (ContactId, OrganizationId, CustomerId,
 SET IDENTITY_INSERT offermanager.CustomerContact OFF;
 
 SET IDENTITY_INSERT offermanager.Location ON;
-INSERT INTO offermanager.Location (LocationId, OrganizationId, LocationName, City, State, Country, PostalCode, CreatedAt) VALUES
-(1, 1, 'Los Angeles Distribution Center', 'Los Angeles', 'CA', 'USA', '90001', SYSUTCDATETIME()),
-(2, 1, 'Dallas Hub', 'Dallas', 'TX', 'USA', '75001', SYSUTCDATETIME()),
-(3, 1, 'Chicago Warehouse', 'Chicago', 'IL', 'USA', '60601', SYSUTCDATETIME()),
-(4, 1, 'New York Terminal', 'New York', 'NY', 'USA', '10001', SYSUTCDATETIME()),
-(5, 2, 'Miami Port Terminal', 'Miami', 'FL', 'USA', '33101', SYSUTCDATETIME()),
-(6, 2, 'Denver Distribution', 'Denver', 'CO', 'USA', '80001', SYSUTCDATETIME()),
-(7, 3, 'Seattle Warehouse', 'Seattle', 'WA', 'USA', '98101', SYSUTCDATETIME()),
-(8, 3, 'Atlanta Logistics Center', 'Atlanta', 'GA', 'USA', '30303', SYSUTCDATETIME());
+INSERT INTO offermanager.Location (LocationId, OrganizationId, Name, City, StateProvince, PostalCode, Country, CreatedAt) VALUES
+(1, 1, 'Los Angeles Distribution Center', 'Los Angeles', 'CA', '90001', 'USA', SYSUTCDATETIME()),
+(2, 1, 'Dallas Hub', 'Dallas', 'TX', '75001', 'USA', SYSUTCDATETIME()),
+(3, 1, 'Chicago Warehouse', 'Chicago', 'IL', '60601', 'USA', SYSUTCDATETIME()),
+(4, 1, 'New York Terminal', 'New York', 'NY', '10001', 'USA', SYSUTCDATETIME()),
+(5, 2, 'Miami Port Terminal', 'Miami', 'FL', '33101', 'USA', SYSUTCDATETIME()),
+(6, 2, 'Denver Distribution', 'Denver', 'CO', '80001', 'USA', SYSUTCDATETIME()),
+(7, 3, 'Seattle Warehouse', 'Seattle', 'WA', '98101', 'USA', SYSUTCDATETIME()),
+(8, 3, 'Atlanta Logistics Center', 'Atlanta', 'GA', '30303', 'USA', SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.Location OFF;
 
 SET IDENTITY_INSERT offermanager.Lane ON;
