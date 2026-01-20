@@ -46,7 +46,7 @@ INSERT INTO offermanager.Customer (CustomerId, OrganizationId, Name, Status, Cre
 SET IDENTITY_INSERT offermanager.Customer OFF;
 
 SET IDENTITY_INSERT offermanager.CustomerContact ON;
-INSERT INTO offermanager.CustomerContact (ContactId, OrganizationId, CustomerId, ContactName, Phone, Email, CreatedAt) VALUES
+INSERT INTO offermanager.CustomerContact (ContactId, OrganizationId, CustomerId, Name, Phone, Email, CreatedAt) VALUES
 (1, 1, 1, 'John Smith', '555-0101', 'john.smith@techcore.com', SYSUTCDATETIME()),
 (2, 1, 1, 'Sarah Johnson', '555-0102', 'sarah.johnson@techcore.com', SYSUTCDATETIME()),
 (3, 1, 2, 'Mike Chen', '555-0201', 'mike.chen@electrosupply.com', SYSUTCDATETIME()),
