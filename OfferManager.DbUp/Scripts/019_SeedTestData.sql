@@ -209,8 +209,6 @@ INSERT INTO offermanager.ActivityEvent (EventId, OrganizationId, EntityType, Ent
 (9, 3, 'Load', 2, 'Load_Created', 8, DATEADD(day, -3, SYSUTCDATETIME())),
 (10, 3, 'Load', 2, 'Milestone_Completed', 8, SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.ActivityEvent OFF;
-
-SET IDENTITY_INSERT offermanager.Role ON;
 INSERT INTO offermanager.Role (RoleId, Name) VALUES
 (1, 'Admin'),
 (2, 'Sales'),
