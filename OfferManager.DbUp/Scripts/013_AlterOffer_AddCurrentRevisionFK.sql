@@ -1,4 +1,4 @@
-IF NOT EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'FK_Offer_CurrentRevision' AND parent_object_id = OBJECT_ID('offermanager.Offer'))
+IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Offer_CurrentRevision' AND parent_object_id = OBJECT_ID('offermanager.Offer'))
 BEGIN
     ALTER TABLE offermanager.Offer
     ADD CONSTRAINT FK_Offer_CurrentRevision
