@@ -71,15 +71,15 @@ INSERT INTO offermanager.Location (LocationId, OrganizationId, Name, City, State
 SET IDENTITY_INSERT offermanager.Location OFF;
 
 SET IDENTITY_INSERT offermanager.Lane ON;
-INSERT INTO offermanager.Lane (LaneId, OrganizationId, OriginLocationId, DestinationLocationId, LaneName, Distance, EstimatedDays, CreatedAt) VALUES
-(1, 1, 1, 2, 'LA to Dallas', 1435, 2, SYSUTCDATETIME()),
-(2, 1, 1, 3, 'LA to Chicago', 2008, 3, SYSUTCDATETIME()),
-(3, 1, 1, 4, 'LA to New York', 2800, 4, SYSUTCDATETIME()),
-(4, 1, 2, 1, 'Dallas to LA', 1435, 2, SYSUTCDATETIME()),
-(5, 1, 2, 3, 'Dallas to Chicago', 926, 1, SYSUTCDATETIME()),
-(6, 1, 3, 4, 'Chicago to New York', 790, 1, SYSUTCDATETIME()),
-(7, 2, 5, 6, 'Miami to Denver', 2038, 3, SYSUTCDATETIME()),
-(8, 3, 7, 8, 'Seattle to Atlanta', 2325, 3, SYSUTCDATETIME());
+INSERT INTO offermanager.Lane (LaneId, OrganizationId, OriginLocationId, DestinationLocationId, LaneCode, DistanceMiles, CreatedAt) VALUES
+(1, 1, 1, 2, 'LA-DAL', 1435, SYSUTCDATETIME()),
+(2, 1, 1, 3, 'LA-CHI', 2008, SYSUTCDATETIME()),
+(3, 1, 1, 4, 'LA-NYC', 2800, SYSUTCDATETIME()),
+(4, 1, 2, 1, 'DAL-LA', 1435, SYSUTCDATETIME()),
+(5, 1, 2, 3, 'DAL-CHI', 926, SYSUTCDATETIME()),
+(6, 1, 3, 4, 'CHI-NYC', 790, SYSUTCDATETIME()),
+(7, 2, 5, 6, 'MIA-DEN', 2038, SYSUTCDATETIME()),
+(8, 3, 7, 8, 'SEA-ATL', 2325, SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.Lane OFF;
 
 SET IDENTITY_INSERT offermanager.Rfq ON;
