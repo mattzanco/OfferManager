@@ -97,16 +97,16 @@ INSERT INTO offermanager.Rfq (RfqId, OrganizationId, CustomerId, OriginLocationI
 SET IDENTITY_INSERT offermanager.Rfq OFF;
 
 SET IDENTITY_INSERT offermanager.RfqAccessorial ON;
-INSERT INTO offermanager.RfqAccessorial (RfqAccessorialId, RfqId, OrganizationId, AccessorialCode, Description, CreatedAt) VALUES
-(1, 1, 1, 'Liftgate', 'Liftgate delivery required', SYSUTCDATETIME()),
-(2, 1, 1, 'Residential', 'Residential delivery', SYSUTCDATETIME()),
-(3, 2, 1, 'Hazmat', 'Hazardous materials', SYSUTCDATETIME()),
-(4, 3, 1, 'Expedited', 'Expedited delivery', SYSUTCDATETIME()),
-(5, 4, 1, 'Detention', 'Detention charges may apply', SYSUTCDATETIME()),
-(6, 6, 2, 'Liftgate', 'Liftgate service', SYSUTCDATETIME()),
-(7, 7, 2, 'Inside', 'Inside delivery', SYSUTCDATETIME()),
-(8, 8, 3, 'Hazmat', 'Hazardous materials shipping', SYSUTCDATETIME()),
-(9, 9, 3, 'Residential', 'Residential delivery area', SYSUTCDATETIME());
+INSERT INTO offermanager.RfqAccessorial (RfqAccessorialId, RfqId, OrganizationId, AccessorialCode, Description, Quantity, CreatedAt) VALUES
+(1, 1, 1, 'Liftgate', 'Liftgate delivery required', 1, SYSUTCDATETIME()),
+(2, 1, 1, 'Residential', 'Residential delivery', 1, SYSUTCDATETIME()),
+(3, 2, 1, 'Hazmat', 'Hazardous materials', 1, SYSUTCDATETIME()),
+(4, 3, 1, 'Expedited', 'Expedited delivery', 1, SYSUTCDATETIME()),
+(5, 4, 1, 'Detention', 'Detention charges may apply', 2, SYSUTCDATETIME()),
+(6, 6, 2, 'Liftgate', 'Liftgate service', 1, SYSUTCDATETIME()),
+(7, 7, 2, 'Inside', 'Inside delivery', 1, SYSUTCDATETIME()),
+(8, 8, 3, 'Hazmat', 'Hazardous materials shipping', 1, SYSUTCDATETIME()),
+(9, 9, 3, 'Residential', 'Residential delivery area', 1, SYSUTCDATETIME());
 SET IDENTITY_INSERT offermanager.RfqAccessorial OFF;
 
 SET IDENTITY_INSERT offermanager.Offer ON;
