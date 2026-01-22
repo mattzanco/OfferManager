@@ -11,7 +11,6 @@ import { RfqForm } from './pages/RfqForm';
 import { Dashboard } from './pages/Dashboard';
 import './App.css';
 
-// Static Web Apps deployment test
 function App() {
   return (
     <BrowserRouter>
