@@ -9,9 +9,9 @@ export interface Rfq {
 }
 
 export const rfqService = {
-  getAll: () => apiClient.get<Rfq[]>('/Rfq'),
-  getById: (id: string) => apiClient.get<Rfq>(`/Rfq/${id}`),
-  create: (data: Partial<Rfq>) => apiClient.post<Rfq>('/Rfq', data),
-  update: (id: string, data: Partial<Rfq>) => apiClient.put<Rfq>(`/Rfq/${id}`, data),
+  getAll: () => apiClient.get<Rfq[]>('/api/Rfq'),
+  getById: (id: string) => apiClient.get<Rfq>(`/api/Rfq/${id}`),
+  create: (data: Partial<Rfq>) => apiClient.post<Rfq>('/api/Rfq', data),
+  update: (id: string, data: Partial<Rfq>) => apiClient.put<Rfq>(`/api/Rfq/${id}`, data),
   delete: (id: string) => apiClient.delete(`/Rfq/${id}`),
 };

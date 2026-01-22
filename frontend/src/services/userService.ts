@@ -9,9 +9,9 @@ export interface User {
 }
 
 export const userService = {
-  getAll: () => apiClient.get<User[]>('/User'),
-  getById: (id: string) => apiClient.get<User>(`/User/${id}`),
-  create: (data: Partial<User>) => apiClient.post<User>('/User', data),
-  update: (id: string, data: Partial<User>) => apiClient.put<User>(`/User/${id}`, data),
-  delete: (id: string) => apiClient.delete(`/User/${id}`),
+  getAll: () => apiClient.get<User[]>('/api/User'),
+  getById: (id: string) => apiClient.get<User>(`/api/User/${id}`),
+  create: (data: Partial<User>) => apiClient.post<User>('/api/User', data),
+  update: (id: string, data: Partial<User>) => apiClient.put<User>(`/api/User/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/api/User/${id}`),
 };
