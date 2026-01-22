@@ -1,7 +1,9 @@
 # OfferManager
 
 ## Overview
-OfferManager is a modular, cloud-ready application for managing offers, users, customers, and related business entities. It is built with ASP.NET Core, uses a SQL Server backend, and is designed for deployment on Azure Kubernetes Service (AKS).
+OfferManager is the **Offer Management microservice** within a larger 3PL (Third-Party Logistics) platform. It provides RESTful APIs for managing quotes, offers, revisions, and related business entities. Built with ASP.NET Core and SQL Server, it is designed as a containerized, independently deployable service within a Kubernetes ecosystem.
+
+This microservice is part of a distributed 3PL system and would integrate with other services such as Customer Management, Pricing Engine, Fulfillment, and Order Management through well-defined API contracts.
 
 ## Features
 - RESTful API for managing Offers, Users, Customers, Documents, and more
@@ -12,12 +14,28 @@ OfferManager is a modular, cloud-ready application for managing offers, users, c
 - Azure DevOps pipeline integration
 
 ## Architecture
+### Microservice Design
+OfferManager follows microservice principles:
+- **Independent deployment**: Containerized and deployable via Kubernetes
+- **Data ownership**: Maintains its own SQL Server database
+- **API-driven**: RESTful API designed for inter-service communication
+- **Scalability**: Horizontal scaling through Kubernetes replicas
+
+### Service Components
 - **OfferManager.Domain**: Domain models and repository interfaces
-- **OfferManager.Storage**: Repository implementations
-- **OfferManager.Services**: Business logic (future extension)
-- **OfferManager.WebApi**: ASP.NET Core Web API
-- **OfferManager.DbUp**: Database migrations
-- **OfferManager.Tests**: Unit tests
+- **OfferManager.Storage**: Data access layer and repository implementations
+- **OfferManager.Services**: Business logic (extensible for future features)
+- **OfferManager.WebApi**: ASP.NET Core REST API
+- **OfferManager.DbUp**: Database schema migrations and initialization
+- **OfferManager.Tests**: Unit tests (xUnit, Moq)
+
+### Integration Points
+This microservice integrates with:
+- **Customer Service**: Retrieves customer information and contact details
+- **Pricing Service**: Accesses pricing rules and rates
+- **RFQ (Request for Quote) Service**: Receives RFQ data and generates offers
+- **Document Service**: Manages offer documents and attachments
+- **Notification Service**: Sends offer notifications and updates
 
 ## Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
