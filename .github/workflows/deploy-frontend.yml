@@ -35,6 +35,10 @@ jobs:
         working-directory: ./frontend
         run: cp public/web.config dist/
 
+      - name: Copy deployment config to dist
+        working-directory: ./frontend
+        run: cp public/.deployment dist/
+
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
