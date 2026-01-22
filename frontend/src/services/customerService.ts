@@ -7,9 +7,9 @@ export interface Customer {
 }
 
 export const customerService = {
-  getAll: () => apiClient.get<Customer[]>('/customers'),
-  getById: (id: string) => apiClient.get<Customer>(`/customers/${id}`),
-  create: (data: Partial<Customer>) => apiClient.post<Customer>('/customers', data),
-  update: (id: string, data: Partial<Customer>) => apiClient.put<Customer>(`/customers/${id}`, data),
-  delete: (id: string) => apiClient.delete(`/customers/${id}`),
+  getAll: () => apiClient.get<Customer[]>('/Customer'),
+  getById: (id: string) => apiClient.get<Customer>(`/Customer/${id}`),
+  create: (data: Partial<Customer>) => apiClient.post<Customer>('/Customer', data),
+  update: (id: string, data: Partial<Customer>) => apiClient.put<Customer>(`/Customer/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/Customer/${id}`),
 };

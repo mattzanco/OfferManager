@@ -5,7 +5,7 @@ using OfferManager.Domain.Models;
 namespace OfferManager.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Organization")]
     public class OrganizationController : ControllerBase
     {
         private readonly IOrganizationRepository _repository;

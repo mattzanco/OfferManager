@@ -5,7 +5,7 @@ using OfferManager.Domain.Models;
 namespace OfferManager.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/rfqs")]
+    [Route("api/Rfq")]
     public class RfqController : ControllerBase
     {
         private readonly IRfqRepository _repository;

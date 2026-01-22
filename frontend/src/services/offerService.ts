@@ -8,9 +8,9 @@ export interface Offer {
 }
 
 export const offerService = {
-  getAll: () => apiClient.get<Offer[]>('/offers'),
-  getById: (id: string) => apiClient.get<Offer>(`/offers/${id}`),
-  create: (data: Partial<Offer>) => apiClient.post<Offer>('/offers', data),
-  update: (id: string, data: Partial<Offer>) => apiClient.put<Offer>(`/offers/${id}`, data),
-  delete: (id: string) => apiClient.delete(`/offers/${id}`),
+  getAll: () => apiClient.get<Offer[]>('/Offer'),
+  getById: (id: string) => apiClient.get<Offer>(`/Offer/${id}`),
+  create: (data: Partial<Offer>) => apiClient.post<Offer>('/Offer', data),
+  update: (id: string, data: Partial<Offer>) => apiClient.put<Offer>(`/Offer/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/Offer/${id}`),
 };

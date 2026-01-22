@@ -5,7 +5,7 @@ using OfferManager.Domain.Models;
 namespace OfferManager.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Lane")]
     public class LaneController : ControllerBase
     {
         private readonly ILaneRepository _repository;

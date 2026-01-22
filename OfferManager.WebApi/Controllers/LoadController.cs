@@ -5,7 +5,7 @@ using OfferManager.Domain.Models;
 namespace OfferManager.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Load")]
     public class LoadController : ControllerBase
     {
         private readonly ILoadRepository _repository;

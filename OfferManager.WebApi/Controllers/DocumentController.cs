@@ -5,7 +5,7 @@ using OfferManager.Domain.Models;
 namespace OfferManager.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/Document")]
     public class DocumentController : ControllerBase
     {
         private readonly IDocumentRepository _repository;
