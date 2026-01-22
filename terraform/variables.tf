@@ -38,7 +38,7 @@ variable "location" {
 }
 
 variable "custom_domain" {
-  description = "Custom domain name for the static web app"
+  description = "Custom domain for the static web app"
   type        = string
   default     = ""
 }

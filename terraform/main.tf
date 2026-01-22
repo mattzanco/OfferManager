@@ -183,7 +183,7 @@ resource "azurerm_static_web_app_custom_domain" "frontend" {
   count               = var.custom_domain != "" ? 1 : 0
   static_web_app_id   = azurerm_static_web_app.frontend.id
   domain_name         = var.custom_domain
-  validation_type     = "cname-delegation"
+  validation_type     = "cname"
 
   depends_on = [azurerm_service_plan.frontend]
 }

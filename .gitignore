@@ -56,3 +56,9 @@ nunit-*.xml
 # Azure deployment profiles (contain credentials)
 profile.xml
 *.publishsettings
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
