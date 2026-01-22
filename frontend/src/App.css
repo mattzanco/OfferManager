@@ -169,3 +169,17 @@ body,
   border-radius: 4px;
   margin-bottom: 1rem;
 }
+
+.footer {
+  background: #333;
+  color: #ccc;
+  text-align: center;
+  padding: 20px;
+  margin-top: auto;
+  border-top: 1px solid #444;
+  font-size: 14px;
+}
+
+.footer p {
+  margin: 0;
+}

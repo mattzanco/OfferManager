@@ -50,6 +50,10 @@ function App() {
             <Route path="/rfqs/edit/:id" element={<RfqForm />} />
           </Routes>
         </main>
+
+        <footer className="footer">
+          <p>&copy; {new Date().getFullYear()} Matt Zanco. All rights reserved.</p>
+        </footer>
       </div>
     </BrowserRouter>
   );
