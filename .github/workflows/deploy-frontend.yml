@@ -31,6 +31,10 @@ jobs:
         env:
           VITE_API_BASE_URL: https://offermanager-dev-backend.azurewebsites.net/api
 
+      - name: Copy web.config to dist
+        working-directory: ./frontend
+        run: cp public/web.config dist/
+
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
