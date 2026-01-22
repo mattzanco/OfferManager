@@ -171,15 +171,17 @@ resource "azurerm_service_plan" "frontend" {
 }
 
 # Static Web App for React Frontend (better for SPAs)
-# Reference existing static web app resource that was created outside Terraform
-data "azurerm_static_web_app" "frontend" {
+resource "azurerm_static_web_app" "frontend" {
   name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
+  location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
+  sku_tier            = "Free"
+  sku_size            = "Free"
 }
 
 resource "azurerm_static_web_app_custom_domain" "frontend" {
   count               = var.custom_domain != "" ? 1 : 0
-  static_web_app_id   = data.azurerm_static_web_app.frontend.id
+  static_web_app_id   = azurerm_static_web_app.frontend.id
   domain_name         = var.custom_domain
   validation_type     = "cname-delegation"
 
