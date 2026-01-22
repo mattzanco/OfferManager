@@ -52,3 +52,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Azure deployment profiles (contain credentials)
+profile.xml
+*.publishsettings
