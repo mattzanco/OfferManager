@@ -185,29 +185,8 @@ resource "azurerm_linux_web_app" "frontend" {
   }
 
   app_settings = {
-    "VITE_API_BASE_URL" = "https://${azurerm_linux_web_app.backend.default_hostname}/api"
+    "VITE_API_BASE_URL" = "http://135.233.56.119/api"
     "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
-  }
-
-  depends_on = [azurerm_service_plan.frontend]
-}
-
-# Placeholder backend app reference (adjust if needed)
-resource "azurerm_linux_web_app" "backend" {
-  name                = substr(replace(lower("${var.app_name}-${var.env}-backend"), "_", "-"), 0, 60)
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  service_plan_id     = azurerm_service_plan.frontend.id
-
-  site_config {
-    application_stack {
-      dotnet_version = "8.0"
-    }
-  }
-
-  app_settings = {
-    "KEY_VAULT_NAME"                      = azurerm_key_vault.app.name
-    "ApplicationInsights--ConnectionString" = azurerm_application_insights.main.connection_string
   }
 
   depends_on = [azurerm_service_plan.frontend]
