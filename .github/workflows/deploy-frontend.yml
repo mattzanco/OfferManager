@@ -36,8 +36,8 @@ jobs:
       - name: Remove App Service config files
         working-directory: ./frontend/dist
         run: |
-          Remove-Item -Force web.config -ErrorAction SilentlyContinue
-          Remove-Item -Force .deployment -ErrorAction SilentlyContinue
+          rm -f web.config
+          rm -f .deployment
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
