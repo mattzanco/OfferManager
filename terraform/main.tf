@@ -170,24 +170,21 @@ resource "azurerm_service_plan" "frontend" {
   sku_name            = "B1"
 }
 
-# App Service for React Frontend
-resource "azurerm_linux_web_app" "frontend" {
+# Static Web App for React Frontend (better for SPAs)
+resource "azurerm_static_web_app" "frontend" {
   name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  service_plan_id     = azurerm_service_plan.frontend.id
+  sku_tier            = "Free"
+  sku_size            = "Free"
+}
 
-  site_config {
-    application_stack {
-      node_version = "20-lts"
-    }
-    always_on = true
-  }
-
-  app_settings = {
-    "VITE_API_BASE_URL" = "http://135.233.56.119/api"
-    "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
-  }
+resource "azurerm_static_web_app_custom_domain" "frontend" {
+  count               = var.custom_domain != "" ? 1 : 0
+  static_web_app_id   = azurerm_static_web_app.frontend.id
+  domain_name         = var.custom_domain
+  validation_type     = "cname"
+}
 
   depends_on = [azurerm_service_plan.frontend]
 }

@@ -12,7 +12,7 @@ output "app_insights_connection_string" {
 }
 
 output "frontend_url" {
-	value       = "https://${azurerm_linux_web_app.frontend.default_hostname}"
-	description = "URL of the React frontend App Service"
+	value       = "https://${azurerm_static_web_app.frontend.default_host_name}"
+	description = "URL of the React frontend Static Web App"
 }
 # Define your Terraform outputs here
