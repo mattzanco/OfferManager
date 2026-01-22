@@ -160,3 +160,55 @@ resource "azurerm_role_assignment" "aks_kubelet_keyvault_secrets_user" {
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
   depends_on           = [azurerm_kubernetes_cluster.main, azurerm_key_vault.app]
 }
+
+# App Service Plan for React Frontend
+resource "azurerm_service_plan" "frontend" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-frontend-asp"), "_", "-"), 0, 40)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
+# App Service for React Frontend
+resource "azurerm_linux_web_app" "frontend" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  service_plan_id     = azurerm_service_plan.frontend.id
+
+  site_config {
+    application_stack {
+      node_version = "20-lts"
+    }
+    always_on = true
+  }
+
+  app_settings = {
+    "VITE_API_BASE_URL" = "https://${azurerm_linux_web_app.backend.default_hostname}/api"
+    "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
+  }
+
+  depends_on = [azurerm_service_plan.frontend]
+}
+
+# Placeholder backend app reference (adjust if needed)
+resource "azurerm_linux_web_app" "backend" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-backend"), "_", "-"), 0, 60)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  service_plan_id     = azurerm_service_plan.frontend.id
+
+  site_config {
+    application_stack {
+      dotnet_version = "8.0"
+    }
+  }
+
+  app_settings = {
+    "KEY_VAULT_NAME"                      = azurerm_key_vault.app.name
+    "ApplicationInsights--ConnectionString" = azurerm_application_insights.main.connection_string
+  }
+
+  depends_on = [azurerm_service_plan.frontend]
+}
