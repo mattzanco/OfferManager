@@ -15,4 +15,14 @@ output "frontend_url" {
 	value       = "https://${azurerm_static_web_app.frontend.default_host_name}"
 	description = "URL of the React frontend Static Web App"
 }
+
+output "api_management_url" {
+	value       = "https://${azurerm_api_management.main.name}.azure-api.net"
+	description = "URL of the API Management service"
+}
+
+output "api_management_gateway_url" {
+	value       = "https://${azurerm_api_management.main.name}.azure-api.net/api"
+	description = "Gateway URL for the OfferManager API"
+}
 # Define your Terraform outputs here

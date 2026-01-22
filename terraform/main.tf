@@ -184,7 +184,78 @@ resource "azurerm_static_web_app_custom_domain" "frontend" {
   static_web_app_id   = azurerm_static_web_app.frontend.id
   domain_name         = var.custom_domain
   validation_type     = "cname"
-}
 
   depends_on = [azurerm_service_plan.frontend]
+}
+
+# API Management for AKS backend
+resource "azurerm_api_management" "main" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-apim"), "_", "-"), 0, 50)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  publisher_name      = "OfferManager"
+  publisher_email     = "admin@offermanager.com"
+  sku_name            = "Consumption_0"
+
+  depends_on = [azurerm_resource_group.main]
+}
+
+# API Management Backend (points to AKS)
+resource "azurerm_api_management_backend" "aks_backend" {
+  name                = "aks-backend"
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  protocol            = "http"
+  url                 = "http://135.233.56.119"
+
+  depends_on = [azurerm_api_management.main]
+}
+
+# API Management API
+resource "azurerm_api_management_api" "offermanager_api" {
+  name                = "offermanager-api"
+  resource_group_name = azurerm_resource_group.main.name
+  api_management_name = azurerm_api_management.main.name
+  revision            = "1"
+  display_name        = "OfferManager API"
+  path                = "api"
+  protocols           = ["https"]
+
+  depends_on = [azurerm_api_management.main]
+}
+
+# API Management Operation - catch all to forward to AKS
+resource "azurerm_api_management_api_operation" "forward_all" {
+  operation_id        = "forward-all"
+  api_name            = azurerm_api_management_api.offermanager_api.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  display_name        = "Forward All Requests"
+  method              = "GET"
+  url_template        = "/*"
+
+  depends_on = [azurerm_api_management_api.offermanager_api]
+}
+
+# Add policy to forward requests to AKS backend
+resource "azurerm_api_management_api_operation_policy" "forward_policy" {
+  api_name            = azurerm_api_management_api.offermanager_api.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  operation_id        = azurerm_api_management_api_operation.forward_all.operation_id
+
+  xml_content = <<XML
+<policies>
+  <inbound>
+    <set-backend-service base-url="http://135.233.56.119" />
+  </inbound>
+  <backend>
+    <forward-request />
+  </backend>
+  <outbound />
+  <on-error />
+</policies>
+XML
+
+  depends_on = [azurerm_api_management_api_operation.forward_all]
 }
