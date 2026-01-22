@@ -4,19 +4,21 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Serilog;
 using Serilog.Events;
 
+var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Load appsettings first
+var config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
+
+// Configure initial Serilog for bootstrap logging
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(new ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-        .AddEnvironmentVariables()
-        .Build())
+    .ReadFrom.Configuration(config)
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateLogger();
-
-var builder = WebApplication.CreateBuilder(args);
 
 // Determine Key Vault name from environment variable, fallback to default
 string keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME") ?? "offermanager-dev-kv";
@@ -42,14 +44,14 @@ catch (Exception ex)
 }
 
 // Replace default logging with Serilog (after Key Vault is loaded so we get correct connection string)
+var aiConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+Log.Information("Application Insights Connection String configured: {HasConnectionString}", !string.IsNullOrEmpty(aiConnectionString));
+
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.ApplicationInsights(
-        ctx.Configuration["ApplicationInsights:ConnectionString"],
-        TelemetryConverter.Traces,
-        restrictedToMinimumLevel: LogEventLevel.Information)
+    .WriteTo.ApplicationInsights(aiConnectionString, TelemetryConverter.Traces, restrictedToMinimumLevel: LogEventLevel.Information)
 );
 
 // Example: Read DB connection string from Key Vault (or fallback to appsettings)
