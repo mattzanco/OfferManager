@@ -35,12 +35,16 @@ jobs:
         working-directory: ./frontend
         run: cp public/web.config dist/
 
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_FRONTEND }}
+
       - name: Disable Oryx build
         uses: azure/appservice-settings@v1
         with:
           app-name: 'offermanager-dev-frontend'
           app-settings-json: '[{"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "false"}]'
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_FRONTEND }}
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
