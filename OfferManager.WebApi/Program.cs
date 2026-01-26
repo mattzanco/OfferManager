@@ -80,10 +80,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("https://salmon-ocean-055ff6810.6.azurestaticapps.net", "https://offermanager-dev-apim.azure-api.net")
+        builder.AllowAnyOrigin()
                .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+               .AllowAnyHeader();
     });
 });
 
