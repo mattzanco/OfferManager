@@ -106,13 +106,22 @@ The app will be available at http://localhost:5173 and will connect to the backe
 	kubectl apply -f k8s/
 	```
 
+
 ## 🔒 Azure Resources
-- Resource Group
-- AKS Cluster
-- ACR
-- Azure SQL Database
-- Azure Key Vault
-- Azure Storage (optional)
+For a full-featured, production-grade deployment, OfferManager leverages the following Azure services:
+
+- **Resource Group**: Logical container for all resources
+- **Azure Kubernetes Service (AKS)**: Orchestrates backend API containers
+- **Azure Container Registry (ACR)**: Stores Docker images for deployment
+- **Azure SQL Database**: Managed relational database for business data
+- **Azure Key Vault**: Secure storage for secrets, connection strings, and certificates
+- **Azure Storage Account**: Blob/file storage for documents and large data
+- **Azure Static Web Apps**: Fast, global hosting for the React frontend
+- **Azure Application Insights**: End-to-end monitoring and telemetry
+- **Azure Monitor**: Centralized logging and metrics
+- **Azure Active Directory**: Identity and access management (optional, for enterprise auth)
+
+You can tailor the deployment to your needs, but these resources provide a robust, scalable, and secure foundation for OfferManager.
 
 ## 🔄 CI/CD
 - Automated pipeline in `azure-pipelines.yml` for build, test, and deploy.
