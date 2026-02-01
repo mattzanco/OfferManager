@@ -15,6 +15,34 @@ OfferManager is a modern, cloud-native platform for managing commercial offers, 
 - **Enterprise Security**: Azure Key Vault integration for secret management.
 - **Observability**: Integrated Application Insights for full-stack monitoring and diagnostics.
 
+
+## 🖥️ Frontend (React + Vite)
+The OfferManager frontend is a modern, high-performance single-page application built with React, TypeScript, and Vite.
+
+**Tech Stack:**
+- React 18
+- TypeScript
+- Vite (fast dev/build tooling)
+- CSS Modules & modern styling
+
+**Features:**
+- Responsive dashboard and UI components
+- API integration with OfferManager backend
+- Authentication-ready architecture
+- Easy extension for new pages and features
+
+**Local Development:**
+```sh
+cd frontend
+npm install
+npm run dev
+```
+The app will be available at http://localhost:5173 and will connect to the backend API for data.
+
+**Deployment:**
+- Ready for Azure Static Web Apps or any modern static hosting platform
+- Automated deployment via GitHub Actions
+
 ## 🏗️ Architecture
 - **Domain Layer**: Business models and repository interfaces.
 - **Storage Layer**: Data access and persistence logic.
