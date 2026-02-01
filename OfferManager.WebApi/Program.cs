@@ -1,4 +1,3 @@
-
 using Azure.Identity;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Serilog;
@@ -53,6 +52,16 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .WriteTo.ApplicationInsights(aiConnectionString, TelemetryConverter.Traces, restrictedToMinimumLevel: LogEventLevel.Information)
 );
+
+// Add Application Insights telemetry for full request/dependency tracking
+if (!string.IsNullOrEmpty(aiConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = aiConnectionString;
+    });
+    Log.Information("Application Insights telemetry enabled (future compatible overload).");
+}
 
 // Example: Read DB connection string from Key Vault (or fallback to appsettings)
 string? dbConnectionString = builder.Configuration["DbConnectionString"];
