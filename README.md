@@ -1,32 +1,38 @@
+
 # OfferManager
 
-## Overview
-OfferManager is a modular, cloud-ready application for managing offers, users, customers, and related business entities. It is built with ASP.NET Core, uses a SQL Server backend, and is designed for deployment on Azure Kubernetes Service (AKS).
+## 🚀 Overview
+OfferManager is a modern, cloud-native platform for managing commercial offers, users, customers, and business workflows. Built with ASP.NET Core and TypeScript, it leverages best practices in modular architecture, cloud deployment, and developer experience. Designed for scalability, security, and rapid iteration, OfferManager is ready for enterprise use and open-source collaboration.
 
-## Features
-- RESTful API for managing Offers, Users, Customers, Documents, and more
-- Modular architecture with Domain, Storage, Services, and WebApi layers
-- Database migrations managed with DbUp and SQL scripts
-- Unit tests for controllers and repositories (xUnit, Moq)
-- Docker and Kubernetes deployment ready
-- Azure DevOps pipeline integration
+## ✨ Key Features
+- **Robust RESTful API**: Manage Offers, Users, Customers, Documents, and more with clean, versioned endpoints.
+- **Modular Architecture**: Separation of concerns across Domain, Storage, Services, and WebApi layers for maintainability and extensibility.
+- **Automated Database Migrations**: Reliable schema evolution using DbUp and SQL scripts.
+- **Comprehensive Testing**: Unit and integration tests for controllers and repositories (xUnit, Moq).
+- **Cloud-Ready Deployment**: Docker and Kubernetes manifests for seamless Azure AKS rollout.
+- **Continuous Integration & Delivery**: Azure DevOps pipelines for automated build, test, and deploy.
+- **Frontend Powered by Vite + React**: Fast, modern UI with TypeScript and component-driven development.
+- **Enterprise Security**: Azure Key Vault integration for secret management.
+- **Observability**: Integrated Application Insights for full-stack monitoring and diagnostics.
 
-## Architecture
-- **OfferManager.Domain**: Domain models and repository interfaces
-- **OfferManager.Storage**: Repository implementations
-- **OfferManager.Services**: Business logic (future extension)
-- **OfferManager.WebApi**: ASP.NET Core Web API
-- **OfferManager.DbUp**: Database migrations
-- **OfferManager.Tests**: Unit tests
+## 🏗️ Architecture
+- **Domain Layer**: Business models and repository interfaces.
+- **Storage Layer**: Data access and persistence logic.
+- **Services Layer**: Business rules and orchestration (extensible).
+- **WebApi Layer**: ASP.NET Core API, CORS, Swagger, and middleware.
+- **DbUp**: Automated database migrations.
+- **Frontend**: React + Vite, TypeScript, modular UI.
+- **Tests**: xUnit, Moq, high coverage.
 
-## Prerequisites
+## 🛠️ Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Node.js & npm](https://nodejs.org/) (for frontend)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (local or Azure SQL)
-- [Docker](https://www.docker.com/products/docker-desktop) (for containerization)
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (for Azure deployment)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) (for Kubernetes management)
+- [Docker](https://www.docker.com/products/docker-desktop)
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
-## Local Development
+## 🏃‍♂️ Getting Started (Local Development)
 1. **Clone the repository**
 	```sh
 	git clone https://github.com/your-org/OfferManager.git
@@ -42,45 +48,49 @@ OfferManager is a modular, cloud-ready application for managing offers, users, c
 	```sh
 	dotnet run --project OfferManager.WebApi/OfferManager.WebApi.csproj
 	```
-4. **Run tests**
+4. **Run the Frontend**
+	```sh
+	cd frontend
+	npm install
+	npm run dev
+	```
+5. **Run tests**
 	```sh
 	dotnet test
 	```
 
-## Docker & Kubernetes
+## ☁️ Cloud Deployment (Docker & Kubernetes)
 1. **Build Docker images**
 	```sh
 	docker build -t offermanager-api -f OfferManager.WebApi/Dockerfile .
 	```
 2. **Push to Azure Container Registry (ACR)**
-	- Create ACR: `az acr create --resource-group <rg> --name <acrName> --sku Basic`
-	- Login: `az acr login --name <acrName>`
-	- Tag & push:
-	  ```sh
-	  docker tag offermanager-api <acrName>.azurecr.io/offermanager-api:latest
-	  docker push <acrName>.azurecr.io/offermanager-api:latest
-	  ```
+	```sh
+	az acr create --resource-group <rg> --name <acrName> --sku Basic
+	az acr login --name <acrName>
+	docker tag offermanager-api <acrName>.azurecr.io/offermanager-api:latest
+	docker push <acrName>.azurecr.io/offermanager-api:latest
+	```
 3. **Deploy to AKS**
-	- Create AKS: `az aks create --resource-group <rg> --name <aksName> --node-count 1 --enable-addons monitoring --generate-ssh-keys`
-	- Get credentials: `az aks get-credentials --resource-group <rg> --name <aksName>`
-	- Apply manifests:
-	  ```sh
-	  kubectl apply -f k8s/
-	  ```
+	```sh
+	az aks create --resource-group <rg> --name <aksName> --node-count 1 --enable-addons monitoring --generate-ssh-keys
+	az aks get-credentials --resource-group <rg> --name <aksName>
+	kubectl apply -f k8s/
+	```
 
-## Azure Resources Needed
+## 🔒 Azure Resources
 - Resource Group
-- Azure Kubernetes Service (AKS) Cluster
-- Azure Container Registry (ACR)
-- Azure SQL Database (or SQL Server VM)
-- Azure Storage (if persistent storage is needed)
-- Azure Key Vault (for secrets, optional)
+- AKS Cluster
+- ACR
+- Azure SQL Database
+- Azure Key Vault
+- Azure Storage (optional)
 
-## CI/CD
-- Azure DevOps pipeline defined in `azure-pipelines.yml`
+## 🔄 CI/CD
+- Automated pipeline in `azure-pipelines.yml` for build, test, and deploy.
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## 🤝 Contributing
+Open to pull requests and collaboration! For major changes, please open an issue to discuss your ideas.
 
-## License
+## 📄 License
 [MIT](LICENSE)
