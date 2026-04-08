@@ -35,24 +35,48 @@ stages:
               Write-Host "Set env to '$envValue' in terraform.tfvars based on branch '$branch'"
             displayName: 'Set Terraform env variable'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-          - task: NuGetToolInstaller@1
-          - task: NuGetCommand@2
+          # Use dotnet CLI (SDK-bundled MSBuild 18+) — VSBuild uses VS MSBuild 17.x, which cannot load .NET 10 SDK.
+          - task: UseDotNet@2
             inputs:
-              restoreSolution: '$(solution)'
-          - task: VSBuild@1
+              version: '10.0.x'
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore'
             inputs:
-              solution: '$(solution)'
-              msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(Build.ArtifactStagingDirectory)/WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
+              command: 'restore'
+              projects: 'OfferManager.sln'
+          - task: DotNetCoreCLI@2
+            displayName: 'Build solution'
+            inputs:
+              command: 'build'
+              projects: 'OfferManager.sln'
+              arguments: '-c $(buildConfiguration) --no-restore'
             env:
               AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
               AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
               AZURE_TENANT_ID: $(ARM_TENANT_ID)
-          - task: VSTest@2
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Web API'
             inputs:
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
+              command: 'publish'
+              projects: 'OfferManager.WebApi/OfferManager.WebApi.csproj'
+              arguments: '-c $(buildConfiguration) -o "$(Build.ArtifactStagingDirectory)/webpublish" --no-build'
+            env:
+              AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZURE_TENANT_ID: $(ARM_TENANT_ID)
+          - powershell: |
+              $src = "$(Build.ArtifactStagingDirectory)/webpublish"
+              $zip = "$(Build.ArtifactStagingDirectory)/WebApp.zip"
+              if (Test-Path $zip) { Remove-Item $zip -Force }
+              Compress-Archive -Path (Join-Path $src '*') -DestinationPath $zip
+              Write-Host "Created $zip"
+            displayName: 'Zip publish output (WebApp.zip)'
+          - task: DotNetCoreCLI@2
+            displayName: 'Test'
+            inputs:
+              command: 'test'
+              projects: 'OfferManager.sln'
+              arguments: '-c $(buildConfiguration) --no-build'
             env:
               AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
               AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
@@ -142,7 +166,7 @@ stages:
         steps:
           - task: UseDotNet@2
             inputs:
-              version: '8.0.x'
+              version: '10.0.x'
           - powershell: |
               Write-Host "Build.SourceBranchName: $(Build.SourceBranchName)"
               Write-Host "Build.SourceBranch: $(Build.SourceBranch)"
@@ -305,6 +329,43 @@ stages:
                 echo "##vso[task.setvariable variable=AKS_NAME]$AKS_NAME"
                 az aks get-credentials --resource-group $(resource_group_name) --name $AKS_NAME --overwrite-existing
 
+          # Microsoft-hosted agents cannot reach a private AKS API. If the API is public but locked down with
+          # authorized IP ranges, merge this run's agent egress IP so kubectl can connect.
+          - task: AzureCLI@2
+            displayName: 'Allow agent IP on AKS API (authorized ranges)'
+            inputs:
+              azureSubscription: 'HireMattServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                set -e
+                if ! command -v jq >/dev/null 2>&1; then
+                  sudo apt-get update -qq
+                  sudo apt-get install -y jq
+                fi
+                RGP="$(resource_group_name)"
+                CLUSTER="$(AKS_NAME)"
+                PVT=$(az aks show -g "$RGP" -n "$CLUSTER" --query "privateFqdn" -o tsv)
+                if [ -n "$PVT" ] && [ "$PVT" != "null" ]; then
+                  echo "##vso[task.logissue type=error]AKS has a private API server (privateFqdn is set). Hosted agents cannot reach it. Use a self-hosted agent in the VNet, or a cluster with a reachable public API for CI."
+                  exit 1
+                fi
+                RANGES_JSON=$(az aks show -g "$RGP" -n "$CLUSTER" --query "apiServerAccessProfile.authorizedIpRanges" -o json)
+                if [ "$RANGES_JSON" = "null" ] || [ -z "$RANGES_JSON" ]; then
+                  echo "No apiServerAccessProfile.authorizedIpRanges restriction (or profile unset). If kubectl still times out, check firewall or subscription policies."
+                  exit 0
+                fi
+                CNT=$(echo "$RANGES_JSON" | jq 'length')
+                if [ "$CNT" -eq 0 ]; then
+                  echo "authorizedIpRanges is empty; not modifying. If API access is blocked, set explicit CIDRs in Azure or use a VNet agent."
+                  exit 0
+                fi
+                AGENT_IP=$(curl -sSf https://api.ipify.org)
+                MERGED=$(echo "$RANGES_JSON" | jq --arg ip "$AGENT_IP" '. + ["\($ip)/32"] | unique')
+                # Azure CLI expects a single comma-separated value (see: az aks update -h).
+                ARGS=$(echo "$MERGED" | jq -r 'join(",")')
+                echo "Updating API authorized IP ranges to include agent ${AGENT_IP}/32 ..."
+                az aks update -g "$RGP" -n "$CLUSTER" --api-server-authorized-ip-ranges "$ARGS"
 
           - bash: |
               IMAGE_TAG=$(Build.BuildId)
@@ -341,6 +402,8 @@ stages:
               kubernetesCluster: '$(AKS_NAME)'
               namespace: 'default'
               command: 'apply'
+              # Avoid OpenAPI fetch from API server (can timeout on private AKS or restricted networks).
+              arguments: '--validate=false'
               useConfigurationFile: true
               configuration: 'k8s'
               secretType: 'None'
