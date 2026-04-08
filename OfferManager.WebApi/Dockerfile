@@ -1,5 +1,5 @@
 # Use the official .NET SDK image for build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["OfferManager.WebApi/OfferManager.WebApi.csproj", "./OfferManager.WebApi/"]
 COPY ["OfferManager.Domain/OfferManager.Domain.csproj", "./OfferManager.Domain/"]
@@ -11,7 +11,7 @@ WORKDIR "/src/OfferManager.WebApi"
 RUN dotnet publish "OfferManager.WebApi.csproj" -c Release -o /app/publish
 
 # Use the official ASP.NET runtime image for the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "OfferManager.WebApi.dll"]
