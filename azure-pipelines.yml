@@ -35,27 +35,48 @@ stages:
               Write-Host "Set env to '$envValue' in terraform.tfvars based on branch '$branch'"
             displayName: 'Set Terraform env variable'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-          - task: NuGetToolInstaller@1
+          # Use dotnet CLI (SDK-bundled MSBuild 18+) — VSBuild uses VS MSBuild 17.x, which cannot load .NET 10 SDK.
           - task: UseDotNet@2
             inputs:
               version: '10.0.x'
-          - task: NuGetCommand@2
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore'
             inputs:
-              restoreSolution: '$(solution)'
-          - task: VSBuild@1
+              command: 'restore'
+              projects: 'OfferManager.sln'
+          - task: DotNetCoreCLI@2
+            displayName: 'Build solution'
             inputs:
-              solution: '$(solution)'
-              msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(Build.ArtifactStagingDirectory)/WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
+              command: 'build'
+              projects: 'OfferManager.sln'
+              arguments: '-c $(buildConfiguration) --no-restore'
             env:
               AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
               AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
               AZURE_TENANT_ID: $(ARM_TENANT_ID)
-          - task: VSTest@2
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Web API'
             inputs:
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
+              command: 'publish'
+              projects: 'OfferManager.WebApi/OfferManager.WebApi.csproj'
+              arguments: '-c $(buildConfiguration) -o "$(Build.ArtifactStagingDirectory)/webpublish" --no-build'
+            env:
+              AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              AZURE_TENANT_ID: $(ARM_TENANT_ID)
+          - powershell: |
+              $src = "$(Build.ArtifactStagingDirectory)/webpublish"
+              $zip = "$(Build.ArtifactStagingDirectory)/WebApp.zip"
+              if (Test-Path $zip) { Remove-Item $zip -Force }
+              Compress-Archive -Path (Join-Path $src '*') -DestinationPath $zip
+              Write-Host "Created $zip"
+            displayName: 'Zip publish output (WebApp.zip)'
+          - task: DotNetCoreCLI@2
+            displayName: 'Test'
+            inputs:
+              command: 'test'
+              projects: 'OfferManager.sln'
+              arguments: '-c $(buildConfiguration) --no-build'
             env:
               AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
               AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
