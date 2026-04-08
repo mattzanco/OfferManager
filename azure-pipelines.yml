@@ -362,9 +362,10 @@ stages:
                 fi
                 AGENT_IP=$(curl -sSf https://api.ipify.org)
                 MERGED=$(echo "$RANGES_JSON" | jq --arg ip "$AGENT_IP" '. + ["\($ip)/32"] | unique')
-                ARGS=$(echo "$MERGED" | jq -r '.[]' | paste -sd' ')
+                # Azure CLI expects a single comma-separated value (see: az aks update -h).
+                ARGS=$(echo "$MERGED" | jq -r 'join(",")')
                 echo "Updating API authorized IP ranges to include agent ${AGENT_IP}/32 ..."
-                az aks update -g "$RGP" -n "$CLUSTER" --api-server-authorized-ip-ranges $ARGS
+                az aks update -g "$RGP" -n "$CLUSTER" --api-server-authorized-ip-ranges "$ARGS"
 
           - bash: |
               IMAGE_TAG=$(Build.BuildId)
