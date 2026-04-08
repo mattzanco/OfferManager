@@ -36,6 +36,9 @@ stages:
             displayName: 'Set Terraform env variable'
             workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
           - task: NuGetToolInstaller@1
+          - task: UseDotNet@2
+            inputs:
+              version: '10.0.x'
           - task: NuGetCommand@2
             inputs:
               restoreSolution: '$(solution)'
@@ -142,7 +145,7 @@ stages:
         steps:
           - task: UseDotNet@2
             inputs:
-              version: '8.0.x'
+              version: '10.0.x'
           - powershell: |
               Write-Host "Build.SourceBranchName: $(Build.SourceBranchName)"
               Write-Host "Build.SourceBranch: $(Build.SourceBranch)"
