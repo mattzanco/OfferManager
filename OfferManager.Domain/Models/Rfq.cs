@@ -4,12 +4,12 @@ namespace OfferManager.Domain.Models
 {
     public class Rfq
     {
-        public Guid RfqId { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Guid CustomerId { get; set; }
-        public Guid? RequestedByContactId { get; set; }
-        public Guid OriginLocationId { get; set; }
-        public Guid DestinationLocationId { get; set; }
+        public int RfqId { get; set; }
+        public int OrganizationId { get; set; }
+        public int CustomerId { get; set; }
+        public int? RequestedByContactId { get; set; }
+        public int OriginLocationId { get; set; }
+        public int DestinationLocationId { get; set; }
         public string Mode { get; set; } = string.Empty;
         public string? EquipmentType { get; set; }
         public string? ServiceLevel { get; set; }
@@ -25,7 +25,7 @@ namespace OfferManager.Domain.Models
         public bool TemperatureControlled { get; set; }
         public string? Notes { get; set; }
         public string Status { get; set; } = "New";
-        public Guid CreatedByUserId { get; set; }
+        public int CreatedByUserId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

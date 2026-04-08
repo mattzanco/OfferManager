@@ -7,9 +7,10 @@ namespace OfferManager.Domain.Interfaces
     public interface ILoadRepository
     {
         Task<IEnumerable<Load>> GetAllAsync();
-        Task<Load?> GetByIdAsync(Guid id);
-        Task<Guid> AddAsync(Load load);
+        Task<Load?> GetByIdAsync(int id);
+        Task<int> AddAsync(Load load);
         Task<bool> UpdateAsync(Load load);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
     }
 }
+

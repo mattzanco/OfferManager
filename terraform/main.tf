@@ -1,3 +1,19 @@
+# Store the Application Insights Connection String in Key Vault
+resource "azurerm_key_vault_secret" "appinsights_connectionstring" {
+  name         = "ApplicationInsights--ConnectionString"
+  value        = azurerm_application_insights.main.connection_string
+  key_vault_id = azurerm_key_vault.app.id
+  depends_on   = [azurerm_application_insights.main, azurerm_key_vault.app]
+}
+# Application Insights
+resource "azurerm_application_insights" "main" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-appi"), "_", "-"), 0, 24)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  application_type    = "web"
+  retention_in_days   = 30
+  # workspace_id can be added for Log Analytics integration
+}
 terraform {
   backend "azurerm" {
     resource_group_name  = "HireMattResources"
@@ -33,7 +49,7 @@ resource "azurerm_key_vault" "app" {
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
   access_policy               = []
-  enable_rbac_authorization   = true
+  rbac_authorization_enabled   = true
 }
 
 # SQL admin credentials (for demo, use Key Vault or secure method in production)
@@ -143,4 +159,103 @@ resource "azurerm_role_assignment" "aks_kubelet_keyvault_secrets_user" {
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_kubernetes_cluster.main.kubelet_identity[0].object_id
   depends_on           = [azurerm_kubernetes_cluster.main, azurerm_key_vault.app]
+}
+
+# App Service Plan for React Frontend
+resource "azurerm_service_plan" "frontend" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-frontend-asp"), "_", "-"), 0, 40)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
+# Static Web App for React Frontend (better for SPAs)
+resource "azurerm_static_web_app" "frontend" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku_tier            = "Free"
+  sku_size            = "Free"
+}
+
+resource "azurerm_static_web_app_custom_domain" "frontend" {
+  count               = var.custom_domain != "" ? 1 : 0
+  static_web_app_id   = azurerm_static_web_app.frontend.id
+  domain_name         = var.custom_domain
+  validation_type     = "cname-delegation"
+
+  depends_on = [azurerm_service_plan.frontend]
+}
+
+# API Management for AKS backend
+resource "azurerm_api_management" "main" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-apim"), "_", "-"), 0, 50)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  publisher_name      = "OfferManager"
+  publisher_email     = "admin@offermanager.com"
+  sku_name            = "Consumption_0"
+
+  depends_on = [azurerm_resource_group.main]
+}
+
+# API Management Backend (points to AKS)
+resource "azurerm_api_management_backend" "aks_backend" {
+  name                = "aks-backend"
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  protocol            = "http"
+  url                 = "http://135.233.56.119"
+
+  depends_on = [azurerm_api_management.main]
+}
+
+# API Management API
+resource "azurerm_api_management_api" "offermanager_api" {
+  name                = "offermanager-api"
+  resource_group_name = azurerm_resource_group.main.name
+  api_management_name = azurerm_api_management.main.name
+  revision            = "1"
+  display_name        = "OfferManager API"
+  path                = "api"
+  protocols           = ["https"]
+
+  depends_on = [azurerm_api_management.main]
+}
+
+# API Management Operation - catch all to forward to AKS
+resource "azurerm_api_management_api_operation" "forward_all" {
+  operation_id        = "forward-all"
+  api_name            = azurerm_api_management_api.offermanager_api.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  display_name        = "Forward All Requests"
+  method              = "GET"
+  url_template        = "/*"
+
+  depends_on = [azurerm_api_management_api.offermanager_api]
+}
+
+# Add policy to forward requests to AKS backend
+resource "azurerm_api_management_api_operation_policy" "forward_policy" {
+  api_name            = azurerm_api_management_api.offermanager_api.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  operation_id        = azurerm_api_management_api_operation.forward_all.operation_id
+
+  xml_content = <<XML
+<policies>
+  <inbound>
+    <set-backend-service base-url="http://135.233.56.119" />
+  </inbound>
+  <backend>
+    <forward-request />
+  </backend>
+  <outbound />
+  <on-error />
+</policies>
+XML
+
+  depends_on = [azurerm_api_management_api_operation.forward_all]
 }

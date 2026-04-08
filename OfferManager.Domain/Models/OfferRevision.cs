@@ -4,9 +4,9 @@ namespace OfferManager.Domain.Models
 {
     public class OfferRevision
     {
-        public Guid OfferRevisionId { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Guid OfferId { get; set; }
+        public int OfferRevisionId { get; set; }
+        public int OrganizationId { get; set; }
+        public int OfferId { get; set; }
         public int RevisionNumber { get; set; }
         public DateTime? ValidFromAt { get; set; }
         public DateTime? ValidUntilAt { get; set; }
@@ -19,7 +19,7 @@ namespace OfferManager.Domain.Models
         public decimal? TotalCost { get; set; }
         public decimal? MarginAmount { get; set; }
         public decimal? MarginPct { get; set; }
-        public Guid CreatedByUserId { get; set; }
+        public int CreatedByUserId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

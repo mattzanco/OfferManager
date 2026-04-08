@@ -16,7 +16,8 @@ namespace OfferManager.Tests
         public RoleControllerTests()
         {
             _mockRepo = new Mock<IRoleRepository>();
-            _controller = new TestRoleController(_mockRepo.Object);
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<TestRoleController>>();
+            _controller = new TestRoleController(_mockRepo.Object, mockLogger.Object);
         }
 
         [Fact]
@@ -100,10 +101,15 @@ namespace OfferManager.Tests
         }
 
         // Minimal test controller for unit tests
-        private class TestRoleController : ControllerBase
+        public class TestRoleController : ControllerBase
         {
             private readonly IRoleRepository _repository;
-            public TestRoleController(IRoleRepository repository) => _repository = repository;
+            private readonly Microsoft.Extensions.Logging.ILogger<TestRoleController> _logger;
+            public TestRoleController(IRoleRepository repository, Microsoft.Extensions.Logging.ILogger<TestRoleController> logger)
+            {
+                _repository = repository;
+                _logger = logger;
+            }
 
             public async Task<IActionResult> GetAll() => Ok(await _repository.GetAllAsync());
             public async Task<IActionResult> GetById(int id)
@@ -130,3 +136,5 @@ namespace OfferManager.Tests
         }
     }
 }
+
+

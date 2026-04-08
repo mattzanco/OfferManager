@@ -13,3 +13,4 @@ namespace OfferManager.Domain.Interfaces
         Task<bool> DeleteAsync(int id);
     }
 }
+

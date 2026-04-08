@@ -1,0 +1,36 @@
+.customer-list {
+  width: 100%;
+}
+
+.customer-list h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.customer-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #2a2a2a;
+}
+
+.customer-list th {
+  background-color: #1a1a1a;
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 2px solid #646cff;
+  font-weight: 600;
+}
+
+.customer-list td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #444;
+}
+
+.customer-list tr:hover {
+  background-color: #333;
+}
+
+.customer-list button {
+  font-size: 0.875rem;
+  padding: 0.4em 0.8em;
+}

@@ -5,5 +5,9 @@ namespace OfferManager.Domain.Models
         public int Id { get; set; }
         public required string Username { get; set; }
         public required string Email { get; set; }
+        public int OrganizationId { get; set; }
+        // Add properties to match repository and DB schema
+        public DateTime CreatedDate { get; set; }
+        public DateTime UpdatedDate { get; set; }
     }
 }

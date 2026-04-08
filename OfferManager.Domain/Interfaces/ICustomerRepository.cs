@@ -7,9 +7,10 @@ namespace OfferManager.Domain.Interfaces
     public interface ICustomerRepository
     {
         Task<IEnumerable<Customer>> GetAllAsync();
-        Task<Customer?> GetByIdAsync(Guid id);
-        Task<Guid> AddAsync(Customer customer);
+        Task<Customer?> GetByIdAsync(int id);
+        Task<int> AddAsync(Customer customer);
         Task<bool> UpdateAsync(Customer customer);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
     }
 }
+

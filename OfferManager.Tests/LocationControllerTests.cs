@@ -16,13 +16,14 @@ namespace OfferManager.Tests
         public LocationControllerTests()
         {
             _mockRepo = new Mock<ILocationRepository>();
-            _controller = new LocationController(_mockRepo.Object);
+            var mockLogger = new Moq.Mock<Microsoft.Extensions.Logging.ILogger<OfferManager.WebApi.Controllers.LocationController>>();
+            _controller = new LocationController(_mockRepo.Object, mockLogger.Object);
         }
 
         [Fact]
         public async Task GetAll_ReturnsOkResult_WithLocations()
         {
-            var locations = new List<Location> { new Location { LocationId = Guid.NewGuid(), Name = "Test" } };
+            var locations = new List<Location> { new Location { LocationId = new System.Random().Next(1, 10000), Name = "Test" } };
             _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(locations);
 
             var result = await _controller.GetAll();
@@ -34,7 +35,7 @@ namespace OfferManager.Tests
         [Fact]
         public async Task GetById_ReturnsOkResult_WhenFound()
         {
-            var locationId = Guid.NewGuid();
+            var locationId = new System.Random().Next(1, 10000);
             var location = new Location { LocationId = locationId, Name = "Test" };
             _mockRepo.Setup(r => r.GetByIdAsync(locationId)).ReturnsAsync(location);
 
@@ -47,7 +48,7 @@ namespace OfferManager.Tests
         [Fact]
         public async Task GetById_ReturnsNotFound_WhenMissing()
         {
-            var missingId = Guid.NewGuid();
+            var missingId = new System.Random().Next(1, 10000);
             _mockRepo.Setup(r => r.GetByIdAsync(missingId)).ReturnsAsync((Location?)null);
             var result = await _controller.GetById(missingId);
             Assert.IsType<NotFoundResult>(result);
@@ -56,7 +57,7 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Create_ReturnsCreatedAtAction()
         {
-            var location = new Location { LocationId = Guid.NewGuid(), Name = "Test" };
+            var location = new Location { LocationId = new System.Random().Next(1, 10000), Name = "Test" };
             _mockRepo.Setup(r => r.AddAsync(location)).ReturnsAsync(location.LocationId);
 
             var result = await _controller.Create(location);
@@ -68,7 +69,7 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Update_ReturnsNoContent_WhenSuccess()
         {
-            var locationId = Guid.NewGuid();
+            var locationId = new System.Random().Next(1, 10000);
             var location = new Location { LocationId = locationId, Name = "Test" };
             _mockRepo.Setup(r => r.UpdateAsync(location)).ReturnsAsync(true);
 
@@ -79,7 +80,7 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Update_ReturnsNotFound_WhenMissing()
         {
-            var locationId = Guid.NewGuid();
+            var locationId = new System.Random().Next(1, 10000);
             var location = new Location { LocationId = locationId, Name = "Test" };
             _mockRepo.Setup(r => r.UpdateAsync(location)).ReturnsAsync(false);
 
@@ -90,7 +91,7 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Delete_ReturnsNoContent_WhenSuccess()
         {
-            var locationId = Guid.NewGuid();
+            var locationId = new System.Random().Next(1, 10000);
             _mockRepo.Setup(r => r.DeleteAsync(locationId)).ReturnsAsync(true);
             var result = await _controller.Delete(locationId);
             Assert.IsType<NoContentResult>(result);
@@ -99,10 +100,12 @@ namespace OfferManager.Tests
         [Fact]
         public async Task Delete_ReturnsNotFound_WhenMissing()
         {
-            var locationId = Guid.NewGuid();
+            var locationId = new System.Random().Next(1, 10000);
             _mockRepo.Setup(r => r.DeleteAsync(locationId)).ReturnsAsync(false);
             var result = await _controller.Delete(locationId);
             Assert.IsType<NotFoundResult>(result);
         }
     }
 }
+
+

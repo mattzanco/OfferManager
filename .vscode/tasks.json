@@ -7,6 +7,13 @@
 			"command": "dotnet run --project OfferManager.DbUp/OfferManager.DbUp.csproj",
 			"isBackground": false,
 			"group": "build"
+		},
+		{
+			"label": "Build and Run WebApi",
+			"type": "shell",
+			"command": "dotnet run --project OfferManager.WebApi/OfferManager.WebApi.csproj",
+			"isBackground": false,
+			"group": "build"
 		}
 	]
 }

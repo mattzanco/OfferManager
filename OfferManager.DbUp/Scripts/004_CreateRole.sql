@@ -6,7 +6,7 @@ CREATE TABLE offermanager.Role (
 CREATE UNIQUE INDEX UX_Role_Name ON offermanager.Role(Name);
 
 CREATE TABLE offermanager.UserRole (
-    UserId UNIQUEIDENTIFIER NOT NULL,
+    UserId INT NOT NULL,
     RoleId INT NOT NULL,
     CONSTRAINT PK_UserRole PRIMARY KEY (UserId, RoleId),
     CONSTRAINT FK_UserRole_User FOREIGN KEY (UserId) REFERENCES offermanager.[User](UserId),

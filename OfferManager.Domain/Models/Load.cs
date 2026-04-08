@@ -4,13 +4,13 @@ namespace OfferManager.Domain.Models
 {
     public class Load
     {
-        public Guid LoadId { get; set; }
-        public Guid OrganizationId { get; set; }
-        public Guid OfferId { get; set; }
-        public Guid OfferRevisionId { get; set; }
-        public Guid CustomerId { get; set; }
-        public Guid OriginLocationId { get; set; }
-        public Guid DestinationLocationId { get; set; }
+        public int LoadId { get; set; }
+        public int OrganizationId { get; set; }
+        public int OfferId { get; set; }
+        public int OfferRevisionId { get; set; }
+        public int CustomerId { get; set; }
+        public int OriginLocationId { get; set; }
+        public int DestinationLocationId { get; set; }
         public string Status { get; set; } = "Planned";
         public DateTime? PickupAt { get; set; }
         public DateTime? DeliveryAt { get; set; }

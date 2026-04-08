@@ -1,39 +1,87 @@
+using Microsoft.Data.SqlClient;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using OfferManager.Domain.Interfaces;
 using OfferManager.Domain.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace OfferManager.Storage.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly List<User> _users = new();
+        private readonly string? _connectionString;
+        private readonly Microsoft.Extensions.Logging.ILogger<UserRepository> _logger;
 
-        public Task<IEnumerable<User>> GetAllAsync() => Task.FromResult<IEnumerable<User>>(_users);
-
-        public Task<User?> GetByIdAsync(int id) => Task.FromResult(_users.Find(u => u.Id == id));
-
-        public Task<int> AddAsync(User user)
+        public UserRepository(IConfiguration configuration, Microsoft.Extensions.Logging.ILogger<UserRepository> logger)
         {
-            _users.Add(user);
-            return Task.FromResult(user.Id);
+            _connectionString = configuration["DbConnectionString"];
+            _logger = logger;
         }
 
-        public Task<bool> UpdateAsync(User user)
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
-            var existing = _users.Find(u => u.Id == user.Id);
-            if (existing == null) return Task.FromResult(false);
-            existing.Username = user.Username;
-            existing.Email = user.Email;
-            return Task.FromResult(true);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.[User]";
+            _logger.LogDebug("Executing SQL: {Sql}", sql);
+            var users = await connection.QueryAsync<User>(sql);
+            _logger.LogInformation("Fetched {Count} users", users.AsList().Count);
+            return users;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
-            var user = _users.Find(u => u.Id == id);
-            if (user == null) return Task.FromResult(false);
-            _users.Remove(user);
-            return Task.FromResult(true);
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "SELECT * FROM offermanager.[User] WHERE UserId = @Id";
+            _logger.LogDebug("Executing SQL: {Sql}, Parameters: {Id}", sql, id);
+            var user = await connection.QuerySingleOrDefaultAsync<User>(sql, new { Id = id });
+            if (user == null)
+                _logger.LogWarning("User not found: {Id}", id);
+            else
+                _logger.LogInformation("User found: {Id}", id);
+            return user;
+        }
+
+        public async Task<int> AddAsync(User user)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"INSERT INTO offermanager.[User] (Username, Email, CreatedDate, UpdatedDate) VALUES (@Username, @Email, @CreatedDate, @UpdatedDate); SELECT CAST(SCOPE_IDENTITY() as int);";
+            user.CreatedDate = DateTime.UtcNow;
+            user.UpdatedDate = DateTime.UtcNow;
+            _logger.LogDebug("Executing SQL: {Sql}, Parameters: {@User}", sql, user);
+            var id = await connection.ExecuteScalarAsync<int>(sql, user);
+            _logger.LogInformation("Added user: {Id}", id);
+            return id;
+        }
+
+        public async Task<bool> UpdateAsync(User user)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = @"UPDATE offermanager.[User] SET Username = @Username, Email = @Email, UpdatedDate = @UpdatedDate WHERE UserId = @Id";
+            user.UpdatedDate = DateTime.UtcNow;
+            _logger.LogDebug("Executing SQL: {Sql}, Parameters: {@User}", sql, user);
+            var rows = await connection.ExecuteAsync(sql, user);
+            if (rows > 0)
+                _logger.LogInformation("Updated user: {Id}", user.Id);
+            else
+                _logger.LogWarning("Update failed, user not found: {Id}", user.Id);
+            return rows > 0;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            const string sql = "DELETE FROM offermanager.[User] WHERE UserId = @Id";
+            _logger.LogDebug("Executing SQL: {Sql}, Parameters: {Id}", sql, id);
+            var rows = await connection.ExecuteAsync(sql, new { Id = id });
+            if (rows > 0)
+                _logger.LogInformation("Deleted user: {Id}", id);
+            else
+                _logger.LogWarning("Delete failed, user not found: {Id}", id);
+            return rows > 0;
         }
     }
 }
+
