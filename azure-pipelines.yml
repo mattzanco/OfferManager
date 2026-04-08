@@ -365,6 +365,8 @@ stages:
               kubernetesCluster: '$(AKS_NAME)'
               namespace: 'default'
               command: 'apply'
+              # Avoid OpenAPI fetch from API server (can timeout on private AKS or restricted networks).
+              arguments: '--validate=false'
               useConfigurationFile: true
               configuration: 'k8s'
               secretType: 'None'
