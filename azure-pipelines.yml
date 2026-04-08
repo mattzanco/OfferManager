@@ -329,6 +329,42 @@ stages:
                 echo "##vso[task.setvariable variable=AKS_NAME]$AKS_NAME"
                 az aks get-credentials --resource-group $(resource_group_name) --name $AKS_NAME --overwrite-existing
 
+          # Microsoft-hosted agents cannot reach a private AKS API. If the API is public but locked down with
+          # authorized IP ranges, merge this run's agent egress IP so kubectl can connect.
+          - task: AzureCLI@2
+            displayName: 'Allow agent IP on AKS API (authorized ranges)'
+            inputs:
+              azureSubscription: 'HireMattServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                set -e
+                if ! command -v jq >/dev/null 2>&1; then
+                  sudo apt-get update -qq
+                  sudo apt-get install -y jq
+                fi
+                RGP="$(resource_group_name)"
+                CLUSTER="$(AKS_NAME)"
+                PVT=$(az aks show -g "$RGP" -n "$CLUSTER" --query "privateFqdn" -o tsv)
+                if [ -n "$PVT" ] && [ "$PVT" != "null" ]; then
+                  echo "##vso[task.logissue type=error]AKS has a private API server (privateFqdn is set). Hosted agents cannot reach it. Use a self-hosted agent in the VNet, or a cluster with a reachable public API for CI."
+                  exit 1
+                fi
+                RANGES_JSON=$(az aks show -g "$RGP" -n "$CLUSTER" --query "apiServerAccessProfile.authorizedIpRanges" -o json)
+                if [ "$RANGES_JSON" = "null" ] || [ -z "$RANGES_JSON" ]; then
+                  echo "No apiServerAccessProfile.authorizedIpRanges restriction (or profile unset). If kubectl still times out, check firewall or subscription policies."
+                  exit 0
+                fi
+                CNT=$(echo "$RANGES_JSON" | jq 'length')
+                if [ "$CNT" -eq 0 ]; then
+                  echo "authorizedIpRanges is empty; not modifying. If API access is blocked, set explicit CIDRs in Azure or use a VNet agent."
+                  exit 0
+                fi
+                AGENT_IP=$(curl -sSf https://api.ipify.org)
+                MERGED=$(echo "$RANGES_JSON" | jq --arg ip "$AGENT_IP" '. + ["\($ip)/32"] | unique')
+                ARGS=$(echo "$MERGED" | jq -r '.[]' | paste -sd' ')
+                echo "Updating API authorized IP ranges to include agent ${AGENT_IP}/32 ..."
+                az aks update -g "$RGP" -n "$CLUSTER" --api-server-authorized-ip-ranges $ARGS
 
           - bash: |
               IMAGE_TAG=$(Build.BuildId)
