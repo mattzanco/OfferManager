@@ -170,9 +170,18 @@ resource "azurerm_service_plan" "frontend" {
   sku_name            = "B1"
 }
 
-# Static Web App for React Frontend (better for SPAs)
+# Staging SPA — deploy from GitHub branch `dev` (existing resource; same Azure name as before)
 resource "azurerm_static_web_app" "frontend" {
   name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku_tier            = "Free"
+  sku_size            = "Free"
+}
+
+# Production SPA — deploy from GitHub branch `main`
+resource "azurerm_static_web_app" "frontend_production" {
+  name                = substr(replace(lower("${var.app_name}-${var.env}-frontend-prod"), "_", "-"), 0, 60)
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   sku_tier            = "Free"

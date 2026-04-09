@@ -11,9 +11,19 @@ output "app_insights_connection_string" {
 	sensitive   = true
 }
 
+output "frontend_staging_url" {
+	value       = "https://${azurerm_static_web_app.frontend.default_host_name}"
+	description = "Staging React frontend (Static Web App, GitHub branch dev)"
+}
+
+output "frontend_production_url" {
+	value       = "https://${azurerm_static_web_app.frontend_production.default_host_name}"
+	description = "Production React frontend (Static Web App, GitHub branch main)"
+}
+
 output "frontend_url" {
 	value       = "https://${azurerm_static_web_app.frontend.default_host_name}"
-	description = "URL of the React frontend Static Web App"
+	description = "Staging frontend URL (same as frontend_staging_url)"
 }
 
 output "api_management_url" {
