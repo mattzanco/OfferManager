@@ -89,10 +89,25 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("https://salmon-ocean-055ff6810.6.azurestaticapps.net", "https://offermanager-dev-apim.azure-api.net")
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        builder.SetIsOriginAllowed(static origin =>
+            {
+                if (string.IsNullOrWhiteSpace(origin)) return false;
+                if (origin.StartsWith("http://localhost:", StringComparison.OrdinalIgnoreCase) ||
+                    origin.StartsWith("https://localhost:", StringComparison.OrdinalIgnoreCase))
+                    return true;
+                try
+                {
+                    var uri = new Uri(origin);
+                    return uri.Host.EndsWith(".azurestaticapps.net", StringComparison.OrdinalIgnoreCase);
+                }
+                catch (UriFormatException)
+                {
+                    return false;
+                }
+            })
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 

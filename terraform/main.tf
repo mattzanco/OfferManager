@@ -233,29 +233,84 @@ resource "azurerm_api_management_api" "offermanager_api" {
   depends_on = [azurerm_api_management.main]
 }
 
-# API Management Operation - catch all to forward to AKS
-resource "azurerm_api_management_api_operation" "forward_all" {
-  operation_id        = "forward-all"
+# CORS at API scope: browser preflight hits APIM first; without this, preflight never reaches ASP.NET.
+resource "azurerm_api_management_api_policy" "offermanager_cors" {
   api_name            = azurerm_api_management_api.offermanager_api.name
   api_management_name = azurerm_api_management.main.name
   resource_group_name = azurerm_resource_group.main.name
-  display_name        = "Forward All Requests"
-  method              = "GET"
-  url_template        = "/*"
-
-  depends_on = [azurerm_api_management_api.offermanager_api]
-}
-
-# Add policy to forward requests to AKS backend
-resource "azurerm_api_management_api_operation_policy" "forward_policy" {
-  api_name            = azurerm_api_management_api.offermanager_api.name
-  api_management_name = azurerm_api_management.main.name
-  resource_group_name = azurerm_resource_group.main.name
-  operation_id        = azurerm_api_management_api_operation.forward_all.operation_id
 
   xml_content = <<XML
 <policies>
   <inbound>
+    <cors allow-credentials="false">
+      <allowed-origins>
+        <origin>https://${azurerm_static_web_app.frontend.default_host_name}</origin>
+        <origin>https://${azurerm_static_web_app.frontend_production.default_host_name}</origin>
+      </allowed-origins>
+      <allowed-methods>
+        <method>GET</method>
+        <method>POST</method>
+        <method>PUT</method>
+        <method>PATCH</method>
+        <method>DELETE</method>
+        <method>OPTIONS</method>
+      </allowed-methods>
+      <allowed-headers>
+        <header>*</header>
+      </allowed-headers>
+      <expose-headers>
+        <header>*</header>
+      </expose-headers>
+    </cors>
+    <base />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
+XML
+
+  depends_on = [azurerm_api_management_api.offermanager_api]
+}
+
+# Catch-all forward per HTTP verb (single GET-only operation blocked POST/PATCH/DELETE to the API).
+locals {
+  apim_forward_methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+}
+
+resource "azurerm_api_management_api_operation" "forward" {
+  for_each            = toset(local.apim_forward_methods)
+  operation_id        = "forward-${each.key}"
+  api_name            = azurerm_api_management_api.offermanager_api.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  display_name        = "Forward ${each.key} /*"
+  method              = each.key
+  url_template        = "/*"
+
+  depends_on = [
+    azurerm_api_management_api.offermanager_api,
+    azurerm_api_management_api_policy.offermanager_cors,
+  ]
+}
+
+resource "azurerm_api_management_api_operation_policy" "forward_policy" {
+  for_each            = azurerm_api_management_api_operation.forward
+  api_name            = azurerm_api_management_api.offermanager_api.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = azurerm_resource_group.main.name
+  operation_id        = each.value.operation_id
+
+  xml_content = <<XML
+<policies>
+  <inbound>
+    <base />
     <set-backend-service base-url="http://135.233.56.119" />
   </inbound>
   <backend>
@@ -266,5 +321,5 @@ resource "azurerm_api_management_api_operation_policy" "forward_policy" {
 </policies>
 XML
 
-  depends_on = [azurerm_api_management_api_operation.forward_all]
+  depends_on = [azurerm_api_management_api_operation.forward]
 }
