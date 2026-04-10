@@ -292,7 +292,8 @@ resource "azurerm_api_management_api_operation" "forward" {
   resource_group_name = azurerm_resource_group.main.name
   display_name        = "Forward ${each.key} /*"
   method              = each.key
-  url_template        = "/*"
+  # Use a named wildcard so policies can reliably reference the captured path.
+  url_template        = "/{*path}"
 
   depends_on = [
     azurerm_api_management_api.offermanager_api,
@@ -312,6 +313,8 @@ resource "azurerm_api_management_api_operation_policy" "forward_policy" {
   <inbound>
     <base />
     <set-backend-service base-url="http://135.233.56.119" />
+    <!-- Preserve backend ASP.NET route prefix (/api/*) for wildcard forwarding. -->
+    <rewrite-uri template="/api/{path}" copy-unmatched-params="true" />
   </inbound>
   <backend>
     <forward-request />
