@@ -294,6 +294,12 @@ resource "azurerm_api_management_api_operation" "forward" {
   method              = each.key
   # Use a named wildcard so policies can reliably reference the captured path.
   url_template        = "/{*path}"
+  template_parameter {
+    name        = "path"
+    required    = true
+    type        = "string"
+    description = "Wildcard path segment forwarded to backend."
+  }
 
   depends_on = [
     azurerm_api_management_api.offermanager_api,
