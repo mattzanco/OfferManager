@@ -170,12 +170,15 @@ resource "azurerm_service_plan" "frontend" {
   sku_name            = "B1"
 }
 
-# Static Web Apps live only in the dev resource group today. The dev SWA serves the
-# `dev` branch (staging) and the dev-frontend-prod SWA serves the `main` branch
-# (production). When env=prd we intentionally do NOT create another pair in the prd
-# RG; the GitHub Actions deploy tokens still target the dev RG SWAs.
+# One Static Web App per environment, named `<app>-<env>-frontend`. The env=dev
+# state previously had this resource as frontend[0]; the moved block migrates
+# that state in place without destroying the existing SWA.
+moved {
+  from = azurerm_static_web_app.frontend[0]
+  to   = azurerm_static_web_app.frontend
+}
+
 resource "azurerm_static_web_app" "frontend" {
-  count               = var.env == "dev" ? 1 : 0
   name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -183,18 +186,9 @@ resource "azurerm_static_web_app" "frontend" {
   sku_size            = "Free"
 }
 
-resource "azurerm_static_web_app" "frontend_production" {
-  count               = var.env == "dev" ? 1 : 0
-  name                = substr(replace(lower("${var.app_name}-${var.env}-frontend-prod"), "_", "-"), 0, 60)
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  sku_tier            = "Free"
-  sku_size            = "Free"
-}
-
 resource "azurerm_static_web_app_custom_domain" "frontend" {
-  count               = var.env == "dev" && var.custom_domain != "" ? 1 : 0
-  static_web_app_id   = azurerm_static_web_app.frontend[0].id
+  count               = var.custom_domain != "" ? 1 : 0
+  static_web_app_id   = azurerm_static_web_app.frontend.id
   domain_name         = var.custom_domain
   validation_type     = "cname-delegation"
 
@@ -238,15 +232,11 @@ resource "azurerm_api_management_api" "offermanager_api" {
 }
 
 locals {
-  # APIM CORS allowlist. In dev we read the SWA hostnames straight from the resources
-  # this terraform manages. In prd the SWAs aren't created here, so we list the dev-RG
-  # SWA hostnames explicitly because that's where the prod frontend is actually hosted.
-  cors_allowed_origins = var.env == "dev" ? [
-    "https://${azurerm_static_web_app.frontend[0].default_host_name}",
-    "https://${azurerm_static_web_app.frontend_production[0].default_host_name}",
-    ] : [
-    "https://green-bush-0aad46610.2.azurestaticapps.net",
-    "https://calm-coast-0bff83110.2.azurestaticapps.net",
+  # Each env's APIM only needs to allow its own SWA: dev APIM serves the dev SPA,
+  # prd APIM serves the prd SPA. The frontend deploy workflow points each branch
+  # at the matching APIM, so cross-env CORS isn't needed.
+  cors_allowed_origins = [
+    "https://${azurerm_static_web_app.frontend.default_host_name}",
   ]
 }
 
