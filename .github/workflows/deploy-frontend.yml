@@ -4,7 +4,8 @@ name: Deploy React Frontend to Azure Static Web Apps
 # GitHub secrets (repository → Settings → Secrets):
 #   AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING    — deployment token for the *staging* Static Web App
 #   AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION — deployment token for the *production* Static Web App
-#   APIM_SUBSCRIPTION_KEY_STAGING              — APIM subscription key used by frontend builds
+#   APIM_SUBSCRIPTION_KEY_STAGING              — APIM subscription key used by *staging* (dev) builds
+#   APIM_SUBSCRIPTION_KEY_PRODUCTION           — APIM subscription key used by *production* (main) builds
 
 on:
   push:
@@ -34,12 +35,34 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
+      - name: Resolve APIM subscription key for branch
+        id: apim
+        env:
+          STAGING_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_STAGING }}
+          PRODUCTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_PRODUCTION }}
+        run: |
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            if [ -z "${PRODUCTION_KEY}" ]; then
+              echo "::error::APIM_SUBSCRIPTION_KEY_PRODUCTION secret is not set."
+              exit 1
+            fi
+            echo "::add-mask::${PRODUCTION_KEY}"
+            echo "key=${PRODUCTION_KEY}" >> "$GITHUB_OUTPUT"
+          else
+            if [ -z "${STAGING_KEY}" ]; then
+              echo "::error::APIM_SUBSCRIPTION_KEY_STAGING secret is not set."
+              exit 1
+            fi
+            echo "::add-mask::${STAGING_KEY}"
+            echo "key=${STAGING_KEY}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build React app
         working-directory: ./frontend
         run: npm run build
         env:
           VITE_API_BASE_URL: https://offermanager-dev-apim.azure-api.net
-          VITE_API_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_STAGING }}
+          VITE_API_KEY: ${{ steps.apim.outputs.key }}
 
       - name: Remove App Service config files
         working-directory: ./frontend/dist
