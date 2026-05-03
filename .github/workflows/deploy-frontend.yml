@@ -35,7 +35,7 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
-      - name: Resolve APIM subscription key for branch
+      - name: Resolve APIM config for branch
         id: apim
         env:
           STAGING_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY_STAGING }}
@@ -48,6 +48,7 @@ jobs:
             fi
             echo "::add-mask::${PRODUCTION_KEY}"
             echo "key=${PRODUCTION_KEY}" >> "$GITHUB_OUTPUT"
+            echo "base_url=https://offermanager-prd-apim.azure-api.net" >> "$GITHUB_OUTPUT"
           else
             if [ -z "${STAGING_KEY}" ]; then
               echo "::error::APIM_SUBSCRIPTION_KEY_STAGING secret is not set."
@@ -55,13 +56,14 @@ jobs:
             fi
             echo "::add-mask::${STAGING_KEY}"
             echo "key=${STAGING_KEY}" >> "$GITHUB_OUTPUT"
+            echo "base_url=https://offermanager-dev-apim.azure-api.net" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build React app
         working-directory: ./frontend
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://offermanager-dev-apim.azure-api.net
+          VITE_API_BASE_URL: ${{ steps.apim.outputs.base_url }}
           VITE_API_KEY: ${{ steps.apim.outputs.key }}
 
       - name: Remove App Service config files
