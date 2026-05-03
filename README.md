@@ -1,133 +1,205 @@
-
 # OfferManager
 
-## 🚀 Overview
-OfferManager is a modern, cloud-native platform for managing commercial offers, users, customers, and business workflows. Built with ASP.NET Core and TypeScript, it leverages best practices in modular architecture, cloud deployment, and developer experience. Designed for scalability, security, and rapid iteration, OfferManager is ready for enterprise use and open-source collaboration.
+A multi-environment, cloud-native SaaS reference app for managing freight RFQs, customer offers, and dispatched loads — built end-to-end on Azure.
 
-## ✨ Key Features
-- **Robust RESTful API**: Manage Offers, Users, Customers, Documents, and more with clean, versioned endpoints.
-- **Modular Architecture**: Separation of concerns across Domain, Storage, Services, and WebApi layers for maintainability and extensibility.
-- **Automated Database Migrations**: Reliable schema evolution using DbUp and SQL scripts.
-- **Comprehensive Testing**: Unit and integration tests for controllers and repositories (xUnit, Moq).
-- **Cloud-Ready Deployment**: Docker and Kubernetes manifests for seamless Azure AKS rollout.
-- **Continuous Integration & Delivery**: Azure DevOps pipelines for automated build, test, and deploy.
-- **Frontend Powered by Vite + React**: Fast, modern UI with TypeScript and component-driven development.
-- **Enterprise Security**: Azure Key Vault integration for secret management.
-- **Observability**: Integrated Application Insights for full-stack monitoring and diagnostics.
+> Portfolio project demonstrating production-style backend, frontend, infrastructure-as-code, and CI/CD across two live environments.
 
+---
 
-## 🖥️ Frontend (React + Vite)
-The OfferManager frontend is a modern, high-performance single-page application built with React, TypeScript, and Vite.
+## Live environments
 
-**Tech Stack:**
-- React 18
-- TypeScript
-- Vite (fast dev/build tooling)
-- CSS Modules & modern styling
+| Environment | Frontend (Azure Static Web Apps) | API (Azure API Management) |
+| --- | --- | --- |
+| Staging (`dev` branch) | `offermanager-dev-frontend.azurestaticapps.net` | `https://offermanager-dev-apim.azure-api.net` |
+| Production (`main` branch) | `offermanager-dev-frontend-prod.azurestaticapps.net` | `https://offermanager-prd-apim.azure-api.net` |
 
-**Features:**
-- Responsive dashboard and UI components
-- API integration with OfferManager backend
-- Authentication-ready architecture
-- Easy extension for new pages and features
+API access requires an APIM subscription key (`Ocp-Apim-Subscription-Key` header).
 
-**Local Development:**
-```sh
-cd frontend
-npm install
-npm run dev
+---
+
+## What it does
+
+OfferManager is a small operations tool for a freight brokerage workflow:
+
+1. A **Customer** submits an **RFQ** (Request for Quote) with origin/destination, equipment, weight, timing, etc.
+2. The brokerage responds with one or more **Offers** (priced quotes, optionally revised over time).
+3. When an offer is accepted, it becomes a **Load** that is tracked through pickup and delivery.
+
+Supporting concepts: Organizations, Users/Roles, Customer Contacts, Locations, Lanes, Documents, Activity Events.
+
+The app exists primarily to demonstrate clean separation of concerns, real cloud deployment, and a working CI/CD story — not as a finished commercial product.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    User[Browser] --> SWA[Azure Static Web Apps<br/>React + Vite SPA]
+    SWA -->|HTTPS + subscription key| APIM[Azure API Management]
+    APIM -->|forwards /api/*| AKS[ASP.NET Core WebApi<br/>on AKS]
+    AKS --> SQL[(Azure SQL Database)]
+    AKS --> KV[Azure Key Vault]
+    AKS --> AI[Application Insights]
+    APIM --> AI
 ```
-The app will be available at http://localhost:5173 and will connect to the backend API for data.
 
-**Deployment:**
-- Ready for Azure Static Web Apps or any modern static hosting platform
-- Automated deployment via GitHub Actions
+Notes:
+- APIM enforces CORS, subscription keys, and forwards wildcard routes (`/{*path}`) to the AKS backend with a URI rewrite that preserves the ASP.NET `/api/*` prefix.
+- WebApi reads secrets (DB connection string, App Insights connection string) from **Key Vault** at startup using `DefaultAzureCredential` — nothing sensitive lives in the repo or container image.
+- Schema migrations are applied by a separate **DbUp** console app run from CI before the AKS deploy.
 
-## 🏗️ Architecture
-- **Domain Layer**: Business models and repository interfaces.
-- **Storage Layer**: Data access and persistence logic.
-- **Services Layer**: Business rules and orchestration (extensible).
-- **WebApi Layer**: ASP.NET Core API, CORS, Swagger, and middleware.
-- **DbUp**: Automated database migrations.
-- **Frontend**: React + Vite, TypeScript, modular UI.
-- **Tests**: xUnit, Moq, high coverage.
+---
 
-## 🛠️ Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- [Node.js & npm](https://nodejs.org/) (for frontend)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (local or Azure SQL)
-- [Docker](https://www.docker.com/products/docker-desktop)
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+## Tech stack
 
-## 🏃‍♂️ Getting Started (Local Development)
-1. **Clone the repository**
-	```sh
-	git clone https://github.com/your-org/OfferManager.git
-	cd OfferManager
-	```
-2. **Set up the database**
-	- Update connection strings in `OfferManager.WebApi/appsettings.Development.json`.
-	- Run migrations:
-	  ```sh
-	  dotnet run --project OfferManager.DbUp/OfferManager.DbUp.csproj
-	  ```
-3. **Run the API**
-	```sh
-	dotnet run --project OfferManager.WebApi/OfferManager.WebApi.csproj
-	```
-4. **Run the Frontend**
-	```sh
-	cd frontend
-	npm install
-	npm run dev
-	```
-5. **Run tests**
-	```sh
-	dotnet test
-	```
+**Backend**
+- ASP.NET Core 10 WebApi (controllers per aggregate)
+- SQL Server / Azure SQL via Dapper-style repositories
+- DbUp for forward-only migrations
+- Serilog → Application Insights for structured logs
+- xUnit + Moq for controller and repository tests
 
-## ☁️ Cloud Deployment (Docker & Kubernetes)
-1. **Build Docker images**
-	```sh
-	docker build -t offermanager-api -f OfferManager.WebApi/Dockerfile .
-	```
-2. **Push to Azure Container Registry (ACR)**
-	```sh
-	az acr create --resource-group <rg> --name <acrName> --sku Basic
-	az acr login --name <acrName>
-	docker tag offermanager-api <acrName>.azurecr.io/offermanager-api:latest
-	docker push <acrName>.azurecr.io/offermanager-api:latest
-	```
-3. **Deploy to AKS**
-	```sh
-	az aks create --resource-group <rg> --name <aksName> --node-count 1 --enable-addons monitoring --generate-ssh-keys
-	az aks get-credentials --resource-group <rg> --name <aksName>
-	kubectl apply -f k8s/
-	```
+**Frontend**
+- React 18 + TypeScript
+- Vite build/dev server
+- React Router v6
+- Axios client with APIM subscription-key header
 
+**Infrastructure & DevOps**
+- Terraform (`terraform/`) provisions: Resource Group, SQL Server + DB, Key Vault, ACR, AKS, App Service Plan, two Static Web Apps (staging + prod), API Management (Consumption tier), Application Insights, role assignments
+- Azure DevOps pipeline (`azure-pipelines.yml`): build, test, `terraform apply`, DbUp migrations, Docker build/push to ACR, `kubectl apply` to AKS — with branch-driven `dev`/`prd` env selection
+- GitHub Actions:
+  - `deploy-frontend.yml` — builds and deploys the SPA to the matching Static Web App per branch, with per-branch APIM subscription key + base URL
+  - `deploy-webapi.yml` — builds and pushes the WebApi image to ACR and updates the AKS deployment
 
-## 🔒 Azure Resources
-For a full-featured, production-grade deployment, OfferManager leverages the following Azure services:
+---
 
-- **Resource Group**: Logical container for all resources
-- **Azure Kubernetes Service (AKS)**: Orchestrates backend API containers
-- **Azure Container Registry (ACR)**: Stores Docker images for deployment
-- **Azure SQL Database**: Managed relational database for business data
-- **Azure Key Vault**: Secure storage for secrets, connection strings, and certificates
-- **Azure Storage Account**: Blob/file storage for documents and large data
-- **Azure Static Web Apps**: Fast, global hosting for the React frontend
-- **Azure Application Insights**: End-to-end monitoring and telemetry
-- **Azure Monitor**: Centralized logging and metrics
-- **Azure Active Directory**: Identity and access management (optional, for enterprise auth)
+## Environments
 
-You can tailor the deployment to your needs, but these resources provide a robust, scalable, and secure foundation for OfferManager.
+| Concern | Staging (`dev`) | Production (`main`) |
+| --- | --- | --- |
+| Resource group | `offermanager-dev-rg` | `offermanager-prd-rg` |
+| AKS cluster | `offermanager-dev-aks` | `offermanager-prd-aks` |
+| SQL Server | `offermanager-dev-sqlsrv` | `offermanager-prd-sqlsrv` |
+| Key Vault | `offermanager-dev-kv` | `offermanager-prd-kv` |
+| APIM | `offermanager-dev-apim` | `offermanager-prd-apim` |
+| Static Web App | `offermanager-dev-frontend` | `offermanager-dev-frontend-prod` |
+| Terraform state key | `offermanager.tfstate-dev` | `offermanager.tfstate-prd` |
 
-## 🔄 CI/CD
-- Automated pipeline in `azure-pipelines.yml` for build, test, and deploy.
+Branch model:
+- `dev` — staging environment, deployed automatically on push
+- `main` — production environment, deployed automatically on push (typically via PR from `dev`)
 
-## 🤝 Contributing
-Open to pull requests and collaboration! For major changes, please open an issue to discuss your ideas.
+---
 
-## 📄 License
-[MIT](LICENSE)
+## CI/CD
+
+```mermaid
+flowchart TB
+    subgraph Backend & Infra (Azure DevOps)
+        A1[Push to dev/main] --> A2[Build + Test .NET solution]
+        A2 --> A3[terraform apply<br/>env=dev or prd]
+        A3 --> A4[DbUp migrations<br/>against Azure SQL]
+        A4 --> A5[Docker build + push to ACR]
+        A5 --> A6[kubectl apply to AKS]
+    end
+
+    subgraph Frontend (GitHub Actions)
+        B1[Push to dev/main] --> B2[npm ci + vite build<br/>with branch-specific<br/>APIM key + base URL]
+        B2 --> B3[Deploy to matching<br/>Azure Static Web App]
+    end
+```
+
+Highlights:
+- **Per-branch secrets:** `APIM_SUBSCRIPTION_KEY_STAGING` and `APIM_SUBSCRIPTION_KEY_PRODUCTION` are read from GitHub Actions secrets; the build fails fast if the relevant secret is missing instead of shipping a broken bundle.
+- **No secrets in repo:** subscription keys, DB connection strings, and App Insights keys are sourced from Key Vault or CI secrets at build/run time.
+- **Single Terraform module, two state files:** `env` is set per branch (`dev` / `prd`) and the backend state key is suffixed accordingly.
+
+---
+
+## Repository layout
+
+```
+OfferManager.Domain/      # Entities + repository interfaces
+OfferManager.Storage/     # Repository implementations (SQL)
+OfferManager.Services/    # (placeholder) business orchestration
+OfferManager.WebApi/      # ASP.NET Core API + Program.cs (DI, CORS, KV, Serilog, AI)
+OfferManager.DbUp/        # Console app that runs SQL migrations
+OfferManager.Tests/       # xUnit tests for controllers + repositories
+OfferManager.Endpoint/    # Minimal/secondary endpoint host (experimental)
+frontend/                 # React + Vite SPA
+k8s/                      # AKS deployment + service manifests
+terraform/                # All Azure infrastructure (single module, multi-env)
+.github/workflows/        # GitHub Actions for frontend + WebApi
+azure-pipelines.yml       # Azure DevOps pipeline for backend + infra
+```
+
+---
+
+## Local development
+
+Prerequisites: .NET 10 SDK, Node.js 20+, Docker (optional), a SQL Server instance (LocalDB, container, or Azure SQL), Azure CLI (only if using Key Vault locally).
+
+1. **Clone**
+   ```sh
+   git clone https://github.com/mattzanco/OfferManager.git
+   cd OfferManager
+   ```
+
+2. **Configure local secrets** (one-time)
+   - Either set `DbConnectionString` in `OfferManager.WebApi/appsettings.Development.json`, or `az login` so the WebApi can pull it from the dev Key Vault on startup.
+
+3. **Run database migrations**
+   ```sh
+   dotnet run --project OfferManager.DbUp
+   ```
+
+4. **Run the API**
+   ```sh
+   dotnet run --project OfferManager.WebApi
+   ```
+   Swagger UI: `https://localhost:7195/swagger`
+
+5. **Run the frontend**
+   ```sh
+   cd frontend
+   cp .env.development .env.local   # then set VITE_API_KEY to a dev APIM subscription key
+   npm ci
+   npm run dev
+   ```
+   App: `http://localhost:5173` (Vite dev server proxies `/api` to `https://localhost:7195`).
+
+6. **Run tests**
+   ```sh
+   dotnet test
+   ```
+
+---
+
+## Notable engineering choices
+
+- **APIM as the single front door.** All browser traffic goes through APIM, which terminates CORS, enforces subscription keys, rate-limits at the edge, and isolates AKS networking concerns from the SPA.
+- **Wildcard route forwarding with URI rewrite.** APIM operations are defined as `/{*path}` per HTTP verb and use `<rewrite-uri template="/api/{path}" />` so a single set of operations covers every controller without per-route Terraform churn.
+- **Fail-fast frontend.** `frontend/src/services/api.ts` throws at startup if `VITE_API_KEY` is missing, and the GitHub Actions workflow refuses to build when the corresponding secret is empty — preventing silent "blank page in prod" deploys.
+- **Branch == environment.** `dev` and `main` map directly to `dev` and `prd` Azure resources, Terraform state files, and APIM keys. No manual environment selection in any pipeline.
+- **Secrets discipline.** No keys, connection strings, or tokens are committed. Local `.env` files contain placeholders only.
+
+---
+
+## Roadmap / next steps
+
+Honest list of things this project does **not** have yet, in roughly the order I would add them:
+
+- **Authentication / authorization** in front of APIM and the SPA (Azure AD or Auth0). Today APIM subscription key is the only gate.
+- **Frontend polish:** consistent design system, empty states, optimistic updates, form validation feedback.
+- **End-to-end tests** (Playwright) running against the staging URL on every PR.
+- **AKS backend address discovery** in Terraform — currently the APIM `set-backend-service` URL is a hardcoded IP that should be replaced with a Kubernetes Service / Ingress address resolved via data source.
+- **Cost teardown script** since AKS + APIM + SQL are not free to leave running.
+- **Observability dashboards** (App Insights workbooks) for request latency, dependency failures, and APIM 4xx/5xx rates.
+
+---
+
+## Author
+
+Built by **Matt Zanco** as a portfolio demonstration of full-stack + cloud + DevOps engineering on the Azure stack.
