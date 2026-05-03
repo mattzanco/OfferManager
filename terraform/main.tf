@@ -170,8 +170,12 @@ resource "azurerm_service_plan" "frontend" {
   sku_name            = "B1"
 }
 
-# Staging SPA — deploy from GitHub branch `dev` (existing resource; same Azure name as before)
+# Static Web Apps live only in the dev resource group today. The dev SWA serves the
+# `dev` branch (staging) and the dev-frontend-prod SWA serves the `main` branch
+# (production). When env=prd we intentionally do NOT create another pair in the prd
+# RG; the GitHub Actions deploy tokens still target the dev RG SWAs.
 resource "azurerm_static_web_app" "frontend" {
+  count               = var.env == "dev" ? 1 : 0
   name                = substr(replace(lower("${var.app_name}-${var.env}-frontend"), "_", "-"), 0, 60)
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -179,8 +183,8 @@ resource "azurerm_static_web_app" "frontend" {
   sku_size            = "Free"
 }
 
-# Production SPA — deploy from GitHub branch `main`
 resource "azurerm_static_web_app" "frontend_production" {
+  count               = var.env == "dev" ? 1 : 0
   name                = substr(replace(lower("${var.app_name}-${var.env}-frontend-prod"), "_", "-"), 0, 60)
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -189,8 +193,8 @@ resource "azurerm_static_web_app" "frontend_production" {
 }
 
 resource "azurerm_static_web_app_custom_domain" "frontend" {
-  count               = var.custom_domain != "" ? 1 : 0
-  static_web_app_id   = azurerm_static_web_app.frontend.id
+  count               = var.env == "dev" && var.custom_domain != "" ? 1 : 0
+  static_web_app_id   = azurerm_static_web_app.frontend[0].id
   domain_name         = var.custom_domain
   validation_type     = "cname-delegation"
 
@@ -233,6 +237,19 @@ resource "azurerm_api_management_api" "offermanager_api" {
   depends_on = [azurerm_api_management.main]
 }
 
+locals {
+  # APIM CORS allowlist. In dev we read the SWA hostnames straight from the resources
+  # this terraform manages. In prd the SWAs aren't created here, so we list the dev-RG
+  # SWA hostnames explicitly because that's where the prod frontend is actually hosted.
+  cors_allowed_origins = var.env == "dev" ? [
+    "https://${azurerm_static_web_app.frontend[0].default_host_name}",
+    "https://${azurerm_static_web_app.frontend_production[0].default_host_name}",
+    ] : [
+    "https://green-bush-0aad46610.2.azurestaticapps.net",
+    "https://calm-coast-0bff83110.2.azurestaticapps.net",
+  ]
+}
+
 # CORS at API scope: browser preflight hits APIM first; without this, preflight never reaches ASP.NET.
 resource "azurerm_api_management_api_policy" "offermanager_cors" {
   api_name            = azurerm_api_management_api.offermanager_api.name
@@ -244,8 +261,7 @@ resource "azurerm_api_management_api_policy" "offermanager_cors" {
   <inbound>
     <cors allow-credentials="false">
       <allowed-origins>
-        <origin>https://${azurerm_static_web_app.frontend.default_host_name}</origin>
-        <origin>https://${azurerm_static_web_app.frontend_production.default_host_name}</origin>
+${join("\n", [for o in local.cors_allowed_origins : "        <origin>${o}</origin>"])}
       </allowed-origins>
       <allowed-methods>
         <method>GET</method>

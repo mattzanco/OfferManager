@@ -10,8 +10,8 @@ A multi-environment, cloud-native SaaS reference app for managing freight RFQs, 
 
 | Environment | Frontend (Azure Static Web Apps) | API (Azure API Management) |
 | --- | --- | --- |
-| Staging (`dev` branch) | `offermanager-dev-frontend.azurestaticapps.net` | `https://offermanager-dev-apim.azure-api.net` |
-| Production (`main` branch) | `offermanager-dev-frontend-prod.azurestaticapps.net` | `https://offermanager-prd-apim.azure-api.net` |
+| Staging (`dev` branch) | [green-bush-0aad46610.2.azurestaticapps.net](https://green-bush-0aad46610.2.azurestaticapps.net) | `https://offermanager-dev-apim.azure-api.net` |
+| Production (`main` branch) | [calm-coast-0bff83110.2.azurestaticapps.net](https://calm-coast-0bff83110.2.azurestaticapps.net) | `https://offermanager-prd-apim.azure-api.net` |
 
 API access requires an APIM subscription key (`Ocp-Apim-Subscription-Key` header).
 
