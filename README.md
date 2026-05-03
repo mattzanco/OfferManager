@@ -97,16 +97,16 @@ Branch model:
 
 ```mermaid
 flowchart TB
-    subgraph Backend & Infra (Azure DevOps)
-        A1[Push to dev/main] --> A2[Build + Test .NET solution]
+    subgraph backend ["Backend and Infra - Azure DevOps"]
+        A1[Push to dev/main] --> A2[Build and test .NET solution]
         A2 --> A3[terraform apply<br/>env=dev or prd]
         A3 --> A4[DbUp migrations<br/>against Azure SQL]
-        A4 --> A5[Docker build + push to ACR]
+        A4 --> A5[Docker build and push to ACR]
         A5 --> A6[kubectl apply to AKS]
     end
 
-    subgraph Frontend (GitHub Actions)
-        B1[Push to dev/main] --> B2[npm ci + vite build<br/>with branch-specific<br/>APIM key + base URL]
+    subgraph frontend ["Frontend - GitHub Actions"]
+        B1[Push to dev/main] --> B2[npm ci and vite build<br/>with branch-specific<br/>APIM key and base URL]
         B2 --> B3[Deploy to matching<br/>Azure Static Web App]
     end
 ```
