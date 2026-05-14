@@ -1,10 +1,10 @@
 import apiClient from './api';
 
 export interface Offer {
-  id: string;
-  currentRevisionId?: string;
-  createdDate: string;
-  // Add other offer fields as needed
+  id: string | number;
+  currentRevisionId?: string | number;
+  createdAt: string;
+  createdDate?: string;
 }
 
 export const offerService = {

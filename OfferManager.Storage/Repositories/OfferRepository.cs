@@ -13,6 +13,18 @@ namespace OfferManager.Storage.Repositories
     {
         private readonly string? _connectionString;
 
+        // OfferId -> Id: table column name does not match the domain property, so Dapper would leave Id at 0 with SELECT *.
+        private const string SelectColumns = @"
+            OfferId AS Id,
+            OrganizationId,
+            RfqId,
+            CustomerId,
+            Status,
+            CurrentRevisionId,
+            CreatedByUserId,
+            CreatedAt,
+            UpdatedAt";
+
         public OfferRepository(IConfiguration configuration)
         {
             _connectionString = configuration["DbConnectionString"];
@@ -21,14 +33,14 @@ namespace OfferManager.Storage.Repositories
         public async Task<IEnumerable<Offer>> GetAllAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = "SELECT * FROM offermanager.Offer";
+            var sql = $"SELECT {SelectColumns} FROM offermanager.Offer";
             return await connection.QueryAsync<Offer>(sql);
         }
 
         public async Task<Offer?> GetByIdAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = "SELECT * FROM offermanager.Offer WHERE OfferId = @Id";
+            var sql = $"SELECT {SelectColumns} FROM offermanager.Offer WHERE OfferId = @Id";
             return await connection.QuerySingleOrDefaultAsync<Offer>(sql, new { Id = id });
         }
 

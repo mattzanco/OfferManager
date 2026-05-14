@@ -325,8 +325,9 @@ resource "azurerm_api_management_api_operation_policy" "forward_policy" {
   <inbound>
     <base />
     <set-backend-service base-url="http://135.233.56.119" />
-    <!-- Preserve backend ASP.NET route prefix (/api/*) for wildcard forwarding. -->
-    <rewrite-uri template="/api/{path}" copy-unmatched-params="true" />
+    <!-- Forward the exact path the client used. Using /api/{path} can drop segments after the first
+         for some wildcard matches, so GET /api/Offer/1 became /api/Offer and never hit GetById. -->
+    <rewrite-uri template="@(context.Request.OriginalUrl.Path)" copy-unmatched-params="true" />
   </inbound>
   <backend>
     <forward-request />
