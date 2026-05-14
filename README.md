@@ -11,7 +11,7 @@ A multi-environment, cloud-native SaaS reference app for managing freight RFQs, 
 | Environment | Frontend (Azure Static Web Apps) | API (Azure API Management) |
 | --- | --- | --- |
 | Staging (`dev` branch) | [green-bush-0aad46610.2.azurestaticapps.net](https://green-bush-0aad46610.2.azurestaticapps.net) | `https://offermanager-dev-apim.azure-api.net` |
-| Production (`main` branch) | Same resource type as staging; hostname is per deploy. Use **Azure Portal** → Static Web App for the `prd` workspace (`offermanager-dev-frontend-prod` resource), or run **`terraform output frontend_url`** after `terraform apply` with `env=prd`. | `https://offermanager-prd-apim.azure-api.net` |
+| Production (`main` branch) | [ashy-ground-07700dd10.7.azurestaticapps.net](https://ashy-ground-07700dd10.7.azurestaticapps.net/) | `https://offermanager-prd-apim.azure-api.net` |
 
 API access requires an APIM subscription key (`Ocp-Apim-Subscription-Key` header).
 
