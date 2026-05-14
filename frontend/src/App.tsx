@@ -31,23 +31,23 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             
-            {/* Offers */}
+            {/* Offers — static path segments before :id so /offers/edit/1 is not captured as id="edit" */}
             <Route path="/offers" element={<OfferList />} />
             <Route path="/offers/new" element={<OfferForm />} />
-            <Route path="/offers/:id" element={<OfferDetail />} />
             <Route path="/offers/edit/:id" element={<OfferForm />} />
+            <Route path="/offers/:id" element={<OfferDetail />} />
             
             {/* Customers */}
             <Route path="/customers" element={<CustomerList />} />
             <Route path="/customers/new" element={<CustomerForm />} />
-            <Route path="/customers/:id" element={<CustomerDetail />} />
             <Route path="/customers/edit/:id" element={<CustomerForm />} />
+            <Route path="/customers/:id" element={<CustomerDetail />} />
             
             {/* RFQs */}
             <Route path="/rfqs" element={<RfqList />} />
             <Route path="/rfqs/new" element={<RfqForm />} />
-            <Route path="/rfqs/:id" element={<RfqDetail />} />
             <Route path="/rfqs/edit/:id" element={<RfqForm />} />
+            <Route path="/rfqs/:id" element={<RfqDetail />} />
           </Routes>
         </main>
 
