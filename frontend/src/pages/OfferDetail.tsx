@@ -62,7 +62,7 @@ export function OfferDetail() {
           </div>
           <div className="detail-row">
             <label>Created Date:</label>
-            <span>{new Date(offer.createdDate).toLocaleDateString()}</span>
+            <span>{new Date(offer.createdAt ?? offer.createdDate ?? '').toLocaleDateString()}</span>
           </div>
           <div className="detail-row">
             <label>Current Revision:</label>

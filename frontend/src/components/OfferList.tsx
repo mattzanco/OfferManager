@@ -53,7 +53,7 @@ export function OfferList() {
             {offers.map((offer) => (
               <tr key={offer.id}>
                 <td>{offer.id}</td>
-                <td>{new Date(offer.createdDate).toLocaleDateString()}</td>
+                <td>{new Date(offer.createdAt ?? offer.createdDate ?? '').toLocaleDateString()}</td>
                 <td>{offer.currentRevisionId || 'N/A'}</td>
                 <td>
                   <button onClick={() => navigate(`/offers/${offer.id}`)} className="btn-small">View</button>
