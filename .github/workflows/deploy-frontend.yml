@@ -1,11 +1,17 @@
 name: Deploy React Frontend to Azure Static Web Apps
 
-# Staging SWA (existing app) ← branch `dev`  |  Production SWA (new app) ← branch `main`
-# GitHub secrets (repository → Settings → Secrets):
+# Staging SWA ← branch `dev`  |  Production SWA ← branch `main`
+# GitHub secrets (repository → Settings → Secrets and variables → Actions):
 #   AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING    — deployment token for the *staging* Static Web App
 #   AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION — deployment token for the *production* Static Web App
 #   APIM_SUBSCRIPTION_KEY_STAGING              — APIM subscription key used by *staging* (dev) builds
 #   APIM_SUBSCRIPTION_KEY_PRODUCTION           — APIM subscription key used by *production* (main) builds
+#
+# If Azure/static-web-apps-deploy fails with:
+#   "No matching Static Web App was found or the api key was invalid"
+# → The token does not match the current SWA resource. In Azure Portal open that environment’s
+#   Static Web App → Overview → **Manage deployment token**, copy the token, and update the
+#   matching GitHub secret. Recreating or moving the SWA invalidates the previous token.
 
 on:
   push:
@@ -71,6 +77,26 @@ jobs:
         run: |
           rm -f web.config
           rm -f .deployment
+
+      - name: Require staging Static Web Apps deploy token
+        if: github.ref != 'refs/heads/main'
+        env:
+          SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING }}
+        run: |
+          if [ -z "${SWA_TOKEN}" ]; then
+            echo "::error::Missing AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING. Azure Portal → staging Static Web App → Overview → Manage deployment token → paste into this repo secret."
+            exit 1
+          fi
+
+      - name: Require production Static Web Apps deploy token
+        if: github.ref == 'refs/heads/main'
+        env:
+          SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION }}
+        run: |
+          if [ -z "${SWA_TOKEN}" ]; then
+            echo "::error::Missing AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION. Azure Portal → **production** Static Web App → Overview → Manage deployment token → paste into this repo secret."
+            exit 1
+          fi
 
       - name: Deploy to staging Static Web App (dev)
         if: github.ref == 'refs/heads/dev'
