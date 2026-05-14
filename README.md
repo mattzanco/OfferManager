@@ -11,7 +11,7 @@ A multi-environment, cloud-native SaaS reference app for managing freight RFQs, 
 | Environment | Frontend (Azure Static Web Apps) | API (Azure API Management) |
 | --- | --- | --- |
 | Staging (`dev` branch) | [green-bush-0aad46610.2.azurestaticapps.net](https://green-bush-0aad46610.2.azurestaticapps.net) | `https://offermanager-dev-apim.azure-api.net` |
-| Production (`main` branch) | _new prd-RG SWA hostname — TBD after next prd pipeline run_ | `https://offermanager-prd-apim.azure-api.net` |
+| Production (`main` branch) | Same resource type as staging; hostname is per deploy. Use **Azure Portal** → Static Web App for the `prd` workspace (`offermanager-dev-frontend-prod` resource), or run **`terraform output frontend_url`** after `terraform apply` with `env=prd`. | `https://offermanager-prd-apim.azure-api.net` |
 
 API access requires an APIM subscription key (`Ocp-Apim-Subscription-Key` header).
 
@@ -90,6 +90,10 @@ Notes:
 Branch model:
 - `dev` — staging environment, deployed automatically on push
 - `main` — production environment, deployed automatically on push (typically via PR from `dev`)
+
+Keeping branches aligned:
+- Ship staging work to production by **merging `dev` into `main`** (then push both remotes).
+- After `main` has moved (for example a hotfix or merge commit only on `main`), **merge `main` back into `dev`** so local and remote `dev` include the same tip as `main` and you avoid long-lived drift.
 
 ---
 
@@ -174,6 +178,18 @@ Prerequisites: .NET 10 SDK, Node.js 20+, Docker (optional), a SQL Server instanc
    ```sh
    dotnet test
    ```
+
+---
+
+## SPA and Web API JSON
+
+The Web API uses ASP.NET Core’s default JSON options (camelCase property names in payloads). The React app should use **the same names and primitive types** the API returns, especially for primary keys and timestamps:
+
+- **Customer** — `customerId`, `organizationId`, `createdAt`, … (not a generic `id` unless you add a dedicated DTO).
+- **RFQ** — `rfqId`, `customerId`, `createdAt`, …
+- **Offer** — the C# model exposes `Id`, so JSON uses `id`.
+
+Several controllers validate that the route id matches the body on `PUT` (for example `CustomerId` / `RfqId`). Mismatched or missing ids, or sending numeric fields as strings, can surface as **400 Bad Request**. The service modules under `frontend/src/services/` are the source of truth for request/response shapes.
 
 ---
 
