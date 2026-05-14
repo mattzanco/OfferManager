@@ -58,7 +58,7 @@ export function CustomerDetail() {
           <h3>Information</h3>
           <div className="detail-row">
             <label>ID:</label>
-            <span>{customer.id}</span>
+            <span>{customer.customerId}</span>
           </div>
           <div className="detail-row">
             <label>Name:</label>

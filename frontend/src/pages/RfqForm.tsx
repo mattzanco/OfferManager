@@ -35,12 +35,24 @@ export function RfqForm() {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const normalizedCustomerId =
+        typeof formData.customerId === 'string'
+          ? parseInt(formData.customerId, 10)
+          : formData.customerId;
       if (id) {
-        await rfqService.update(id, formData);
+        const rfqId = parseInt(id, 10);
+        await rfqService.update(id, {
+          ...formData,
+          rfqId,
+          customerId: normalizedCustomerId,
+        });
         navigate(`/rfqs/${id}`);
       } else {
-        const response = await rfqService.create(formData);
-        navigate(`/rfqs/${response.data.id}`);
+        const response = await rfqService.create({
+          ...formData,
+          customerId: normalizedCustomerId,
+        });
+        navigate(`/rfqs/${response.data.rfqId}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save RFQ');
@@ -62,7 +74,7 @@ export function RfqForm() {
           <input
             type="text"
             name="customerId"
-            value={formData.customerId || ''}
+            value={formData.customerId != null ? String(formData.customerId) : ''}
             onChange={handleChange}
             placeholder="Enter customer ID"
             required
