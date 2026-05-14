@@ -50,12 +50,12 @@ export function CustomerList() {
           </thead>
           <tbody>
             {customers.map((customer) => (
-              <tr key={customer.id}>
-                <td>{customer.id}</td>
+              <tr key={customer.customerId}>
+                <td>{customer.customerId}</td>
                 <td>{customer.name}</td>
                 <td>
-                  <button onClick={() => navigate(`/customers/${customer.id}`)} className="btn-small">View</button>
-                  <button onClick={() => navigate(`/customers/edit/${customer.id}`)} className="btn-small">Edit</button>
+                  <button onClick={() => navigate(`/customers/${customer.customerId}`)} className="btn-small">View</button>
+                  <button onClick={() => navigate(`/customers/edit/${customer.customerId}`)} className="btn-small">Edit</button>
                 </td>
               </tr>
             ))}

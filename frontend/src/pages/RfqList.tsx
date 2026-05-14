@@ -52,14 +52,14 @@ export function RfqList() {
           </thead>
           <tbody>
             {rfqs.map((rfq) => (
-              <tr key={rfq.id}>
-                <td>{rfq.id}</td>
+              <tr key={rfq.rfqId}>
+                <td>{rfq.rfqId}</td>
                 <td>{rfq.customerId}</td>
-                <td>{new Date(rfq.createdDate).toLocaleDateString()}</td>
+                <td>{new Date(rfq.createdAt).toLocaleDateString()}</td>
                 {rfqs.some(r => r.status) && <td>{rfq.status || 'N/A'}</td>}
                 <td>
-                  <button onClick={() => navigate(`/rfqs/${rfq.id}`)} className="btn-small">View</button>
-                  <button onClick={() => navigate(`/rfqs/edit/${rfq.id}`)} className="btn-small">Edit</button>
+                  <button onClick={() => navigate(`/rfqs/${rfq.rfqId}`)} className="btn-small">View</button>
+                  <button onClick={() => navigate(`/rfqs/edit/${rfq.rfqId}`)} className="btn-small">Edit</button>
                 </td>
               </tr>
             ))}

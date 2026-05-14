@@ -58,7 +58,7 @@ export function RfqDetail() {
           <h3>Information</h3>
           <div className="detail-row">
             <label>ID:</label>
-            <span>{rfq.id}</span>
+            <span>{rfq.rfqId}</span>
           </div>
           <div className="detail-row">
             <label>Customer ID:</label>
@@ -66,7 +66,7 @@ export function RfqDetail() {
           </div>
           <div className="detail-row">
             <label>Created Date:</label>
-            <span>{new Date(rfq.createdDate).toLocaleDateString()}</span>
+            <span>{new Date(rfq.createdAt).toLocaleDateString()}</span>
           </div>
           {rfq.status && (
             <div className="detail-row">

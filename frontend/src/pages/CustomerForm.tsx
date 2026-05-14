@@ -36,11 +36,14 @@ export function CustomerForm() {
     setSubmitting(true);
     try {
       if (id) {
-        await customerService.update(id, formData);
+        await customerService.update(id, {
+          ...formData,
+          customerId: parseInt(id, 10),
+        });
         navigate(`/customers/${id}`);
       } else {
         const response = await customerService.create(formData);
-        navigate(`/customers/${response.data.id}`);
+        navigate(`/customers/${response.data.customerId}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save customer');

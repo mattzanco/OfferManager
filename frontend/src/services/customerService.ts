@@ -1,9 +1,13 @@
 import apiClient from './api';
 
 export interface Customer {
-  id: string;
+  customerId: number;
+  organizationId: number;
   name: string;
-  // Add other customer fields as needed
+  accountCode?: string | null;
+  billingTerms?: string | null;
+  status: string;
+  createdAt: string;
 }
 
 export const customerService = {
