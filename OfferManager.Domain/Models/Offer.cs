@@ -3,7 +3,7 @@ namespace OfferManager.Domain.Models;
 public class Offer
 {
     public int Id { get; set; }
-    public required string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Price { get; set; }
     // Add properties to match repository and DB schema
