@@ -31,6 +31,11 @@ body,
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
+}
+
+.navbar-user {
+  margin-left: auto;
 }
 
 .navbar-brand h1 {

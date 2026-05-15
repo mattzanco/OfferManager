@@ -13,7 +13,7 @@ A multi-environment, cloud-native SaaS reference app for managing freight RFQs, 
 | Staging (`dev` branch) | [green-bush-0aad46610.2.azurestaticapps.net](https://green-bush-0aad46610.2.azurestaticapps.net) | `https://offermanager-dev-apim.azure-api.net` |
 | Production (`main` branch) | [ashy-ground-07700dd10.7.azurestaticapps.net](https://ashy-ground-07700dd10.7.azurestaticapps.net/) | `https://offermanager-prd-apim.azure-api.net` |
 
-API access requires an APIM subscription key (`Ocp-Apim-Subscription-Key` header).
+API access uses **Microsoft Entra ID** bearer tokens when authentication is enabled (recommended for the hosted SPA). APIM can still accept a subscription key (`Ocp-Apim-Subscription-Key`) during migration or for scripts.
 
 ---
 
@@ -203,11 +203,66 @@ Several controllers validate that the route id matches the body on `PUT` (for ex
 
 ---
 
+## Authentication (Microsoft Entra ID)
+
+The app supports Entra ID (Azure AD) JWT auth end-to-end. It is **off by default** until you create app registrations and set configuration.
+
+### 1. App registrations (Entra admin center)
+
+Create two registrations in the same tenant:
+
+| App | Type | Notes |
+| --- | --- | --- |
+| **OfferManager API** | Web/API | Expose scope `access_as_user`. Set Application ID URI to `api://<api-client-id>`. |
+| **OfferManager SPA** | Single-page application | Redirect URIs: `http://localhost:5173`, staging/prod Static Web App URLs. API permission: `access_as_user` on the API app (admin consent). |
+
+Optional app roles on the API app (e.g. `Broker`, `Admin`) appear in the token `roles` claim.
+
+### 2. API configuration
+
+Key Vault / `appsettings` (double underscore in env vars):
+
+| Key | Example |
+| --- | --- |
+| `AzureAd:Enabled` | `true` |
+| `AzureAd:TenantId` | your tenant GUID |
+| `AzureAd:ClientId` | API app (client) ID |
+| `AzureAd:Audience` | `api://<api-client-id>` |
+
+### 3. Frontend (Vite)
+
+| Variable | Example |
+| --- | --- |
+| `VITE_AUTH_ENABLED` | `true` |
+| `VITE_AZURE_TENANT_ID` | tenant GUID |
+| `VITE_AZURE_CLIENT_ID` | SPA app (client) ID |
+| `VITE_AZURE_API_SCOPE` | `api://<api-client-id>/access_as_user` |
+| `VITE_API_BASE_URL` | leave empty locally (Vite proxies `/api`); set to APIM URL in CI |
+
+GitHub Actions: repository secrets `ENTRA_TENANT_ID`, `ENTRA_SPA_CLIENT_ID`, `ENTRA_API_SCOPE`, and variable `VITE_AUTH_ENABLED=true` when ready.
+
+### 4. APIM (Terraform)
+
+```hcl
+entra_tenant_id    = "<tenant-guid>"
+entra_api_audience = "api://<api-client-id>"
+```
+
+`terraform apply` adds a `validate-jwt` policy on the API. Health checks that hit the pod directly are unchanged.
+
+### 5. Local dev without Entra
+
+Keep `AzureAd:Enabled=false` and `VITE_AUTH_ENABLED=false`. Use `VITE_API_KEY` and optional `VITE_API_BASE_URL` empty with `npm run dev` (proxy to local WebApi).
+
+`GET /api/Me` returns the signed-in user's claims when auth is enabled.
+
+---
+
 ## Roadmap / next steps
 
 Honest list of things this project does **not** have yet, in roughly the order I would add them:
 
-- **Authentication / authorization** in front of APIM and the SPA (Azure AD or Auth0). Today APIM subscription key is the only gate.
+- **Role-based authorization** wired to Entra app roles and/or `UserRole` in the database.
 - **Frontend polish:** consistent design system, empty states, optimistic updates, form validation feedback.
 - **End-to-end tests** (Playwright) running against the staging URL on every PR.
 - **AKS backend address discovery** in Terraform — currently the APIM `set-backend-service` URL is a hardcoded IP that should be replaced with a Kubernetes Service / Ingress address resolved via data source.

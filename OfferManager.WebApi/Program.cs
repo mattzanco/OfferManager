@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using OfferManager.WebApi.Auth;
 using Serilog;
 using Serilog.Events;
 
@@ -111,10 +112,20 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddOfferManagerAuthentication(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var authEnabled = builder.Configuration.GetValue<bool>($"{AuthOptions.SectionName}:Enabled");
+if (authEnabled)
+{
+    Log.Information("Azure AD authentication is enabled for the API.");
+}
+else
+{
+    Log.Warning("Azure AD authentication is disabled. Do not use this configuration in production.");
+}
 
 var app = builder.Build();
 
@@ -122,6 +133,13 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
+
+if (authEnabled)
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
+
 app.MapControllers();
 
 try

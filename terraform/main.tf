@@ -238,6 +238,15 @@ locals {
   cors_allowed_origins = [
     "https://${azurerm_static_web_app.frontend.default_host_name}",
   ]
+
+  apim_jwt_validation_policy = var.entra_tenant_id != "" && var.entra_api_audience != "" ? <<-JWT
+    <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Sign in and send a valid Bearer token.">
+      <openid-config url="https://login.microsoftonline.com/${var.entra_tenant_id}/v2.0/.well-known/openid-configuration" />
+      <audiences>
+        <audience>${var.entra_api_audience}</audience>
+      </audiences>
+    </validate-jwt>
+JWT : ""
 }
 
 # CORS at API scope: browser preflight hits APIM first; without this, preflight never reaches ASP.NET.
@@ -268,6 +277,7 @@ ${join("\n", [for o in local.cors_allowed_origins : "        <origin>${o}</origi
         <header>*</header>
       </expose-headers>
     </cors>
+${local.apim_jwt_validation_policy}
     <base />
   </inbound>
   <backend>

@@ -6,6 +6,8 @@ name: Deploy React Frontend to Azure Static Web Apps
 #   AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION — deployment token for the *production* Static Web App
 #   APIM_SUBSCRIPTION_KEY_STAGING              — APIM subscription key used by *staging* (dev) builds
 #   APIM_SUBSCRIPTION_KEY_PRODUCTION           — APIM subscription key used by *production* (main) builds
+#   Optional (when VITE_AUTH_ENABLED=true in build):
+#   ENTRA_TENANT_ID, ENTRA_SPA_CLIENT_ID, ENTRA_API_SCOPE (e.g. api://<api-app-id>/access_as_user)
 #
 # If Azure/static-web-apps-deploy fails with:
 #   "No matching Static Web App was found or the api key was invalid"
@@ -71,6 +73,10 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ steps.apim.outputs.base_url }}
           VITE_API_KEY: ${{ steps.apim.outputs.key }}
+          VITE_AUTH_ENABLED: ${{ vars.VITE_AUTH_ENABLED || 'false' }}
+          VITE_AZURE_TENANT_ID: ${{ secrets.ENTRA_TENANT_ID }}
+          VITE_AZURE_CLIENT_ID: ${{ secrets.ENTRA_SPA_CLIENT_ID }}
+          VITE_AZURE_API_SCOPE: ${{ secrets.ENTRA_API_SCOPE }}
 
       - name: Remove App Service config files
         working-directory: ./frontend/dist

@@ -43,3 +43,15 @@ variable "custom_domain" {
   default     = ""
 }
 
+variable "entra_tenant_id" {
+  description = "Microsoft Entra ID tenant ID. When set, APIM validates JWTs on inbound API calls."
+  type        = string
+  default     = ""
+}
+
+variable "entra_api_audience" {
+  description = "API Application ID URI (audience), e.g. api://<api-app-client-id>"
+  type        = string
+  default     = ""
+}
+
